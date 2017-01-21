@@ -8,10 +8,12 @@ import pandas as pd
 import time
 from tqdm import trange, tqdm
 
-# from pymongo import MongoClient
+from pymongo import MongoClient
+import multiprocessing
+from time import sleep
 
 
-POOL_SIZE = 4
+POOL_SIZE = 2
 API_HOST = "https://311.boston.gov/reports/"
 
 DB_NAME = "yelp"
@@ -125,27 +127,27 @@ def make_csv_from_pkl():
     df.to_csv('test.csv', index=False)
 
 
+def scrape_sequential(file_path, ignore_header=True):
+    case_ids = get_case_ids(file_path, ignore_header=True)
+    len_case_ids = len(case_ids)
+    print len_case_ids, 'rows'
+    done_case_ids = get_done_case_ids()
+    len_done_case_ids = len(done_case_ids)
+    print len_done_case_ids, 'already done'
+    print len_case_ids - len_done_case_ids, 'left to do'
+
+    filtered_case_ids = [i for i in case_ids if i not in done_case_ids]
+
+    for case_enquiry_id in tqdm(filtered_case_ids):
+        get_case(case_enquiry_id)
+
+
+
 if __name__ == '__main__':
     FILE_PATH = 'case_enquiry_ids_head.csv'
     FILE_PATH = 'case_enquiry_ids.csv'
 
-    t2 = Timer(lambda: scrape_parallel_concurrent(FILE_PATH, chunk_size=10))
-    print "Completed parallel in %s seconds." % t2.timeit(1)
-
-    # scrape_sequential('case_enquiry_ids_head.csv')
-    finished_case_ids = set([item['case_enquiry_id'] for item in coll])
-
-    case_ids = get_case_ids(FILE_PATH, ignore_header=True)
-
-    print '### Going over all the missed case_ids...'
-    for case_id in tqdm(case_ids):
-        case_id = int(float(case_id))
-
-        if case_id not in finished_case_ids:
-            get_case(case_id)
-
-    export_deque_to_pkl(coll)
-    print 'PKL made'
-
-    make_csv_from_pkl()
-    print 'CSV made'
+    scrape_sequential(FILE_PATH)
+    
+    # t2 = Timer(lambda: scrape_parallel_concurrent(FILE_PATH, POOL_SIZE))
+    # print "Completed parallel in %s seconds." % t2.timeit(1)

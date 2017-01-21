@@ -12,9 +12,9 @@ def get_specific_location(soup):
         return ps[0].text
 
 
-def make_soup(url, url_params=None):
-    # time.sleep(2)
-    r = requests.get(url, params=url_params)
+def make_soup(url, url_params=None, timeout=5):
+    time.sleep(1)
+    r = requests.get(url, params=url_params, timeout=timeout)
     html_doc = r.text
     soup = BeautifulSoup(html_doc, 'html.parser')
     return soup
