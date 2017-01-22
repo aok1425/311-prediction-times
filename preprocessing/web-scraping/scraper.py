@@ -12,16 +12,52 @@ from pymongo import MongoClient
 import multiprocessing
 from time import sleep
 
+import stem.process
+from stem import Signal
+from stem.control import Controller
+from stem import CircStatus
+
 
 POOL_SIZE = 2
 API_HOST = "https://311.boston.gov/reports/"
+SOCKS_PORT = 7000
+
+
+# http://stackoverflow.com/questions/34733562/change-tor-ip-from-python-with-stem
+def getIP():
+    with Controller.from_port(port = 9051) as controller:
+        controller.authenticate()
+        for circ in controller.get_circuits()[-1:]:
+            if circ.status != CircStatus.BUILT:
+                continue
+
+            exit_fp, exit_nickname = circ.path[-1]
+
+            exit_desc = controller.get_network_status(exit_fp, None)
+            exit_address = exit_desc.address if exit_desc else 'unknown'
+
+            print "Last exit relay:", exit_nickname, exit_address
+            # print ("  fingerprint: %s" % exit_fp)
+            # print ("  nickname: %s" % exit_nickname)
+            # print ("  address: %s" % exit_address)
+
+
+def set_new_ip():
+    """Change IP using TOR"""
+    with Controller.from_port(port=9051) as controller:
+        controller.authenticate()
+        controller.signal(Signal.NEWNYM)
 
 DB_NAME = "yelp"
 COLLECTION_NAME = "business"
 
-# client = MongoClient()
-# db = client[DB_NAME]
-# coll = db[COLLECTION_NAME]
+
+def get_done_case_ids():
+    mongo_client = MongoClient(connect=False)
+    coll = mongo_client['311']['done']
+    done_ids = coll.distinct('case_enquiry_id')
+    mongo_client.close()
+    return done_ids
 
 
 coll = deque()
@@ -46,8 +82,16 @@ def get_case(case_id):
     """
     # this one actually appends to d
     soup = make_soup(API_HOST + str(case_id))
+    if soup.text == 'throttled':
+        print 'Skipping this iteration bc throttled'
+        return None
     d = get_content(soup, case_id)
     coll.append(d)
+
+    mongo_client = MongoClient(connect=False)
+    db = mongo_client['311']['done']
+    db.insert_one(d)
+    mongo_client.close()
 
 
 def case_info_concurrent(case_ids):
@@ -147,7 +191,23 @@ if __name__ == '__main__':
     FILE_PATH = 'case_enquiry_ids_head.csv'
     FILE_PATH = 'case_enquiry_ids.csv'
 
-    scrape_sequential(FILE_PATH)
+    tor_process = stem.process.launch_tor_with_config(
+        config = {
+            'SocksPort': str(SOCKS_PORT),
+            'ControlPort': '9051'
+            }
+        )
+
+    for _ in trange(10**3):
+        # scrape_sequential(FILE_PATH)
+        getIP()                                         
+        scrape_parallel_concurrent(FILE_PATH, POOL_SIZE)
+        set_new_ip()
+        # sleep(60)
+
+    # t1 = Timer(lambda: scrape_sequential(FILE_PATH))
+    # print 'Completed sequential in {} seconds.'.format(t1.timeit(1))
     
     # t2 = Timer(lambda: scrape_parallel_concurrent(FILE_PATH, POOL_SIZE))
     # print "Completed parallel in %s seconds." % t2.timeit(1)
+    tor_process.kill()  # stops tor
