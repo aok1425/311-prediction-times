@@ -203,8 +203,7 @@ def scrape_sequential(file_path, ignore_header=True):
     filtered_case_ids = [i for i in case_ids if i not in done_case_ids]
 
     for case_enquiry_id in tqdm(filtered_case_ids):
-        get_case(case_enquiry_id)
-
+        get_case(case_enquiry_id)      
 
 if __name__ == '__main__':
     FILE_PATH = 'case_enquiry_ids_head.csv'
@@ -225,16 +224,15 @@ if __name__ == '__main__':
             }
         )
 
-    for _ in trange(10**3):
-        # scrape_sequential(FILE_PATH)
-        getIP()                                         
-        scrape_parallel_concurrent(FILE_PATH, POOL_SIZE)
-        set_new_ip()
-        # sleep(60)
+    # this value represents 1/10th of the total
+    # so multiply by 10 to get total estimated time
+    num = int(342642 / CHUNK_SIZE / 10)
+    # num = 50
+    for _ in trange(num):
+        getIP()
+        # scrape_sequential(FILE_PATH, filtered_case_id_chunk_generator) 
+        scrape_w_threads(FILE_PATH, filtered_case_id_chunk_generator)                              
+        # scrape_parallel_concurrent(FILE_PATH, POOL_SIZE, filtered_case_id_chunk_generator)
+        ip_blacklist += [set_new_different_ip(ip_blacklist)]
 
-    # t1 = Timer(lambda: scrape_sequential(FILE_PATH))
-    # print 'Completed sequential in {} seconds.'.format(t1.timeit(1))
-    
-    # t2 = Timer(lambda: scrape_parallel_concurrent(FILE_PATH, POOL_SIZE))
-    # print "Completed parallel in %s seconds." % t2.timeit(1)
-    tor_process.kill()  # stops tor
+    tor_process.kill()
