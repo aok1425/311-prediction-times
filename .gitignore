@@ -1,4 +1,5 @@
 # Added by Alex
+mongo_case_descriptions/
 *.csv
 *.pkl
 
