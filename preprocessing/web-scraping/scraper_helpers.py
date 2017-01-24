@@ -71,12 +71,17 @@ def get_content(soup, case_enquiry_id):
 
 =======
     h2_text = soup.find(class_='content-head').h2.text
+<<<<<<< HEAD:preprocessing/web-scraping/scraper_helpers.py
 >>>>>>> 9c52c9b... now works w Tor! using this on AWS:preprocessing/web-scraping/helper_scrapers.py
     if h2_text != 'Report not available':
+=======
+    if h2_text not in ('Report not available', 'Report not found'):
+>>>>>>> be24b06... added to helper_scraper.py to ignore when Report not found:preprocessing/web-scraping/helper_scrapers.py
         d['title'] = h2_text
         d['description'] = soup.find(class_='content-well').blockquote.p.text
         d['specific_location'] = get_specific_location(soup)
 
+<<<<<<< HEAD:preprocessing/web-scraping/scraper_helpers.py
     return d
 <<<<<<< HEAD:preprocessing/web-scraping/scraper_helpers.py
 
@@ -89,3 +94,6 @@ if __name__=='__main__':
         pprint(get_content(soup, int(REPORT_NUM)))
 =======
 >>>>>>> 9c52c9b... now works w Tor! using this on AWS:preprocessing/web-scraping/helper_scrapers.py
+=======
+    return d
+>>>>>>> be24b06... added to helper_scraper.py to ignore when Report not found:preprocessing/web-scraping/helper_scrapers.py

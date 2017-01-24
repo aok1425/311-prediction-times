@@ -57,21 +57,10 @@ def get_done_case_ids():
     coll = mongo_client['311']['done']
     done_ids = coll.distinct('case_enquiry_id')
     mongo_client.close()
-    return done_ids
+    return frozenset(done_ids)
 
 
 coll = deque()
-
-# def get_cases_parallel(case_id):
-#     """
-#     Retrieves the JSON response that contains the top 20 business meta data for city.
-#     :param case_id: city name
-#     """
-#     # this was gonna be used for multiprocessing, but i didn't end up using it
-#     assert type(case_id) == str
-#     case_id = int(float(case_id))
-#     response = get_case(case_id)
-#     coll.append(response)
 
 
 def get_case(case_id):
@@ -85,6 +74,14 @@ def get_case(case_id):
     if soup.text == 'throttled':
         print 'Skipping this iteration bc throttled'
         return None
+    elif len(soup.text) < 400:
+        print case_id
+        print soup.text
+        return None
+    elif soup is None:
+        print 'soup {} returns None'.format(case_id)
+        return None
+
     d = get_content(soup, case_id)
     coll.append(d)
 
@@ -110,6 +107,29 @@ def case_info_concurrent(case_ids):
 
     for t in threads:
         t.join()
+
+
+def make_filtered_case_ids(file_path, chunk_size):
+    case_ids = get_case_ids(file_path, ignore_header=True)
+    len_case_ids = len(case_ids)
+    print len_case_ids, 'rows'
+    done_case_ids = get_done_case_ids()
+    len_done_case_ids = len(done_case_ids)
+    print len_done_case_ids, 'already done'
+    print len_case_ids - len_done_case_ids, 'left to do'
+
+    result = []
+
+    for case_id in case_ids:
+        t = threading.Thread(target=get_case, args=[case_id])
+        threads += [t]
+
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    yield result # for the very last one
 
 
 def open_file_in_chunks(file_path, chunk_size=5, ignore_header=True):
@@ -186,10 +206,17 @@ def scrape_sequential(file_path, ignore_header=True):
         get_case(case_enquiry_id)
 
 
-
 if __name__ == '__main__':
     FILE_PATH = 'case_enquiry_ids_head.csv'
     FILE_PATH = 'case_enquiry_ids.csv'
+    POOL_SIZE = 2
+    API_HOST = "https://311.boston.gov/reports/"
+    SOCKS_PORT = 7000    
+    CHUNK_SIZE = 20
+
+    ip_blacklist = []
+
+    filtered_case_id_chunk_generator = make_filtered_case_ids(FILE_PATH, CHUNK_SIZE)
 
     tor_process = stem.process.launch_tor_with_config(
         config = {
