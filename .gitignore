@@ -1,4 +1,5 @@
 # Added by Alex
+*.h5
 mongo_case_descriptions/
 *.csv
 *.pkl
