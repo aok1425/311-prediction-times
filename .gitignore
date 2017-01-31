@@ -1,8 +1,8 @@
 # Added by Alex
 Untitled*.ipynb
+311*.csv
 *.h5
 mongo_case_descriptions/
-*.csv
 *.pkl
 
 # Byte-compiled / optimized / DLL files
