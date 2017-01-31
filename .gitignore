@@ -4,6 +4,9 @@ Untitled*.ipynb
 *.h5
 mongo_case_descriptions/
 *.pkl
+311__Service_Requests.csv
+temp_case_descs.csv
+case_enquiry_ids.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
