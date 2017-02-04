@@ -83,7 +83,7 @@ class CensusVariablesTransformer(object):
         elif category == 'housing':
             new_df[category] = max_categ_df.map(lambda txt: txt[8:])
             
-    return new_df
+	return new_df
 
 
     def transform_poverty_race(self, df, category):

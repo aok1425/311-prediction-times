@@ -23,7 +23,7 @@ def get_zipcode(row, d):
     return row
 
 
-def add_my_zip_codes(df):
+def add_my_zipcodes(df):
     mapping = make_mapping_dict(df)
     df['zipcode'] = df.apply(lambda row: get_zipcode(row, mapping))
     df.zipcode = df.zipcode.fillna(df.LOCATION_ZIPCODE)

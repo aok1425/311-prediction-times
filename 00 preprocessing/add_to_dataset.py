@@ -5,13 +5,14 @@ import pandas as pd
 import shapegeocode
 from datetime import datetime
 import re
+from tqdm import tqdm
 
 from transform_census_variables import transform_census_variables
-from adding_zipcodes import adding_zipcodes
+from adding_zipcodes import add_my_zipcodes
 
 
 def get_tract_block_group(lat, long_, shp_obj):
-    d = gc.geocode(lat, long_)
+    d = shp_obj.geocode(lat, long_)
     return d['TRACTCE'] + d['BLKGRPCE']
 
 
@@ -66,8 +67,8 @@ def adding_is_description(df):
 def main():
     df = pd.read_pickle('../data/data_w_descs.pkl')
 
-    for fn in [add_census_tract, add_census_data, convert_datetime, add_descriptions, add_completion_time, \
-        make_booleans, fill_nas, adding_is_description, transform_census_variables, adding_zipcodes]:
+    for fn in tqdm([add_census_tract, add_census_data, convert_datetime, add_descriptions, add_completion_time, \
+        make_booleans, fill_nas, adding_is_description, transform_census_variables, add_my_zipcodes]):
         df = fn(df)
 
     df.to_pickle('../data/data_from_add_to_dataset.pkl')
