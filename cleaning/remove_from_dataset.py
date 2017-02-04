@@ -63,6 +63,8 @@ def drop_cols(df):
         'SUBJECT',
         'neighborhood',
         'LOCATION_STREET_NAME',
+        'ClosedPhoto',
+        'Geocoded_Location',
         'is_issue_unresolved']
 
     return df.drop(cols_to_drop, axis=1)
