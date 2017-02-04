@@ -63,11 +63,9 @@ class CensusVariablesTransformer(object):
         category_total_col = d[category]
         category_cols = [col for col in df.columns if category + '_' == col[:len(category) + 1]]
         categ_df = df[category_cols]
+        categ_df_wo_total = categ_df[[col for col in categ_df.columns if col != category_total_col]]
         
-        if category == 'income': # super-hacky, but this is a one-time process
-            categ_df = categ_df.drop('income_per_capita', axis=1)
-        
-        max_categ_df = categ_df[[col for col in categ_df.columns if col != category_total_col]].idxmax(axis=1)
+        max_categ_df = categ_df_wo_total.idxmax(axis=1)
         new_df = df.drop(category_cols, axis=1)    
         
         if category == 'bedroom':
@@ -82,8 +80,10 @@ class CensusVariablesTransformer(object):
             new_df[category] = max_categ_df.map(lambda txt: self.get_value(txt)) 
         elif category == 'housing':
             new_df[category] = max_categ_df.map(lambda txt: txt[8:])
+
+        new_df[category + '_std_dev'] = categ_df_wo_total.std(axis=1)
             
-	return new_df
+        return new_df
 
 
     def transform_poverty_race(self, df, category):

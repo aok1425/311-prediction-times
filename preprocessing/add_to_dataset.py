@@ -26,6 +26,7 @@ def add_census_tract(df):
 def add_census_data(df):
     df_census = pd.read_pickle('../data/census_data_aggregated.pkl')
     df_final = df.merge(df_census, on='tract_and_block_group', how='left')
+    df_final = df_final.rename(index=str, columns={'income_per_capita': 'earned_income_per_capita'}) # for transform_census_variables
     return df_final
 
 
@@ -70,7 +71,13 @@ def adding_is_description(df):
     return df
 
 
-def add_my_neighborhood(df):
+def add_queue_for_past_wk(df):
+    df_queue = pd.read_csv('../data/feat_queue_wk.csv')
+    df1 = df.merge(df_queue, on='case_enquiry_id', how='left')
+    return df1
+
+
+def add_my_neighborhoods(df):
     df['neighborhood_from_zip'] = df.zipcode.map(zipcode_mapping)
     return df
 
@@ -79,8 +86,8 @@ def main(input_path):
     df = pd.read_pickle(input_path)
 
     for fn in tqdm([convert_datetime, add_descriptions, add_completion_time, \
-        make_booleans, fill_nas, add_census_tract, \
-        add_census_data, adding_is_description, add_my_zipcodes, transform_census_variables, add_my_neighborhood]):
+        make_booleans, fill_nas, add_census_tract, add_queue_for_past_wk, \
+        add_census_data, adding_is_description, add_my_zipcodes, add_my_neighborhoods, transform_census_variables]):
         df = fn(df)
 
     return df
