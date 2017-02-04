@@ -87,7 +87,7 @@ def drop_incorrect_latlongs(df):
     For the sake of time, I will regettably drop them and do a quick EDA on what they are, in case dropping them might bias our results.
     """
     df_offending = df[df.neighborhood.notnull()][df.neighborhood_from_zip != df.neighborhood][df.LATITUDE == 42.3594]
-    offending_case_enquiry_ids = df_incorrect_lat_longs['CASE_ENQUIRY_ID']
+    offending_case_enquiry_ids = df_offending['CASE_ENQUIRY_ID']
     new_df = df[~df.CASE_ENQUIRY_ID.isin(offending_case_enquiry_ids)]
     return new_df
 

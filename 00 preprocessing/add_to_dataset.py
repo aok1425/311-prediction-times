@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from transform_census_variables import transform_census_variables
 from adding_zipcodes import add_my_zipcodes
+from zipcode_mapping import zipcode_mapping
 
 
 def get_tract_block_group(lat, long_, shp_obj):
@@ -69,12 +70,17 @@ def adding_is_description(df):
     return df
 
 
+def add_my_neighborhood(df):
+    df['neighborhood_from_zip'] = df.zipcode.map(zipcode_mapping)
+    return df
+
+
 def main(input_path):
     df = pd.read_pickle(input_path)
 
     for fn in tqdm([convert_datetime, add_descriptions, add_completion_time, \
         make_booleans, fill_nas, add_census_tract, \
-        add_census_data, adding_is_description, add_my_zipcodes, transform_census_variables]):
+        add_census_data, adding_is_description, add_my_zipcodes, transform_census_variables, add_my_neighborhood]):
         df = fn(df)
 
     return df
