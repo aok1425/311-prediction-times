@@ -1,6 +1,7 @@
 from __future__ import division
 import pandas as pd
 from zipcode_mapping import zipcode_mapping
+from tqdm import tqdm
 
 
 def clean_sources(df):
@@ -9,7 +10,7 @@ def clean_sources(df):
 
 
 def remove_null_ys(df):
-    return df.dropna(subset='CLOSED_DT')
+    return df.dropna(subset=['CLOSED_DT'])
 
 
 def drop_invalid_issues(df):
@@ -94,8 +95,8 @@ def drop_incorrect_latlongs(df):
 def main(input_path):
     df = pd.read_pickle(input_path)  
 
-    for fn in [drop_duplicate_rows, clean_sources, remove_null_ys, drop_invalid_issues, impute_where_no_census_data, \
-        drop_neg_completion_times, drop_cols, drop_internal_rows, add_my_zipcode_col, drop_incorrect_latlongs]:
+    for fn in tqdm([drop_duplicate_rows, clean_sources, remove_null_ys, drop_invalid_issues, drop_incorrect_latlongs, \
+        impute_where_no_census_data, drop_neg_completion_times, drop_cols, drop_internal_rows, add_my_zipcode_col]):
         df = fn(df)
 
     return df   
