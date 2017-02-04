@@ -71,15 +71,15 @@ class CensusVariablesTransformer(object):
         new_df = df.drop(category_cols, axis=1)    
         
         if category == 'bedroom':
-            new_df[category] = max_categ_df.map(lambda txt: get_bedroom(txt))
+            new_df[category] = max_categ_df.map(lambda txt: self.get_bedroom(txt))
         elif category == 'school':
             new_df[category] = max_categ_df.map(lambda txt: txt.replace('school_', ''))
         elif category == 'rent':
-            new_df[category] = max_categ_df.map(lambda txt: get_rent(txt))
+            new_df[category] = max_categ_df.map(lambda txt: self.get_rent(txt))
         elif category == 'income':
-            new_df[category] = max_categ_df.map(lambda txt: get_income(txt))
+            new_df[category] = max_categ_df.map(lambda txt: self.get_income(txt))
         elif category == 'value':
-            new_df[category] = max_categ_df.map(lambda txt: get_value(txt)) 
+            new_df[category] = max_categ_df.map(lambda txt: self.get_value(txt)) 
         elif category == 'housing':
             new_df[category] = max_categ_df.map(lambda txt: txt[8:])
             
@@ -118,13 +118,14 @@ class CensusVariablesTransformer(object):
 
     def run(self):
         # TODO: look into the below dropna
-        new_df = transform_categ_mode(self.df.dropna(subset=['housing_own']), 'school')
+        new_df = self.transform_categ_mode(self.df.dropna(subset=['housing_own']), 'school')
+        # new_df = self.transform_categ_mode(self.df, 'school')
 
         for categ in ['housing', 'bedroom', 'value', 'rent', 'income']:
-            new_df = transform_categ_mode(new_df, categ)
+            new_df = self.transform_categ_mode(new_df, categ)
 
         for categ in ['race', 'poverty']:
-            new_df = transform_poverty_race(new_df, categ)
+            new_df = self.transform_poverty_race(new_df, categ)
 
         return new_df
 

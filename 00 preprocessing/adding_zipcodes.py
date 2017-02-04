@@ -19,12 +19,11 @@ def make_mapping_dict(df, neighbors=5):
 
 
 def get_zipcode(row, d):
-    row['zipcode'] = d[(row['LATITUDE'], row['LONGITUDE'])]
-    return row
+    return d[(row['LATITUDE'], row['LONGITUDE'])]
 
 
 def add_my_zipcodes(df):
-    mapping = make_mapping_dict(df)
-    df['zipcode'] = df.apply(lambda row: get_zipcode(row, mapping))
-    df.zipcode = df.zipcode.fillna(df.LOCATION_ZIPCODE)
+    d = make_mapping_dict(df)
+    df['zipcode'] = df.LOCATION_ZIPCODE.copy()
+    df.zipcode.ix[df.zipcode.isnull()] = df[df.zipcode.isnull()].apply(lambda row: get_zipcode(row, d), axis=1)
     return df

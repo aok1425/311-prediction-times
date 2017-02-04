@@ -91,15 +91,17 @@ def drop_incorrect_latlongs(df):
     return new_df
 
 
-def main():
-    df = pd.read_pickle('../data/data_from_add_to_dataset.pkl')  
+def main(input_path):
+    df = pd.read_pickle(input_path)  
 
-    for fn in [drop_duplicate_rows, clean_sources, remove_null_ys, drop_invalid_issues, impute_where_no_census_data \
+    for fn in [drop_duplicate_rows, clean_sources, remove_null_ys, drop_invalid_issues, impute_where_no_census_data, \
         drop_neg_completion_times, drop_cols, drop_internal_rows, add_my_zipcode_col, drop_incorrect_latlongs]:
         df = fn(df)
 
-    df.to_pickle('../data/data_from_remove_from_dataset.pkl')    
+    return df   
 
 
 if __name__ == '__main__':
-    main()
+    input_path = '../data/data_from_add_to_dataset.pkl'
+    df = main(input_path)
+    df.to_pickle('../data/data_from_remove_from_dataset.pkl') 
