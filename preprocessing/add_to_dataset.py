@@ -27,7 +27,7 @@ def add_census_data(df):
     df_census = pd.read_pickle('../data/census_data_aggregated.pkl')
     df_final = df.merge(df_census, on='tract_and_block_group', how='left')
     df_final = df_final.rename(index=str, columns={'income_per_capita': 'earned_income_per_capita'}) # for transform_census_variables
-    df_final.earned_income_per_capita = df_final.earned_income_per_capita.astype(int)
+    df_final.earned_income_per_capita = pd.to_numeric(df_final.earned_income_per_capita, errors='coerce')
     return df_final
 
 
@@ -53,7 +53,7 @@ def add_descriptions(df):
 
 
 def add_completion_time(df):
-    df['COMPLETION_TIME'] = (df.CLOSED_DT - df.OPEN_DT).apply(lambda x: x / pd.np.timedelta64(1, 'h'))
+    df['COMPLETION_HOURS_LOG_10'] = pd.np.log10((df.CLOSED_DT - df.OPEN_DT).apply(lambda x: x / pd.np.timedelta64(1, 'h')))
     return df
 
 
@@ -75,13 +75,13 @@ def adding_is_description(df):
 
 def add_queue_for_past_wk(df):
     df_queue = pd.read_csv('../data/feat_queue_wk.csv')
-    df1 = df.merge(df_queue, left_on='CASE_ENQUIRY_ID', right_on='case_enquiry_id', how='left')
+    df1 = df.merge(df_queue, on='CASE_ENQUIRY_ID', how='left')
     return df1
 
 
 def add_queue_for_past_wk_open(df):
     df_queue = pd.read_csv('../data/feat_queue_wk_open.csv')
-    df1 = df.merge(df_queue, left_on='CASE_ENQUIRY_ID', right_on='case_enquiry_id', how='left')
+    df1 = df.merge(df_queue, on='CASE_ENQUIRY_ID', how='left')
     return df1    
 
 
@@ -90,12 +90,23 @@ def add_my_neighborhoods(df):
     return df
 
 
+def impute_earned_income_per_cap(df):
+    """
+    Anecdotally, it looks like the Census blocks with missing values are where no people live,
+    like the Boston Common or Suffolk Downs. 311 issues still happen here, so I'll impute with the median.
+    """
+    median_value = df.earned_income_per_capita.median()
+    df.earned_income_per_capita.fillna(median_value, inplace=True)
+    return df
+
+
 def main(input_path):
     df = pd.read_pickle(input_path)
 
-    for fn in tqdm([convert_datetime, add_descriptions, add_completion_time, \
-        make_booleans, fill_nas, add_census_tract, add_queue_for_past_wk, add_queue_for_past_wk_open, \
-        add_census_data, adding_is_description, add_my_zipcodes, add_my_neighborhoods, transform_census_variables]):
+    for fn in tqdm([convert_datetime, add_descriptions, add_completion_time,
+        make_booleans, fill_nas, add_census_tract, add_queue_for_past_wk, add_queue_for_past_wk_open,
+        add_census_data, adding_is_description, add_my_zipcodes, add_my_neighborhoods, transform_census_variables,
+        impute_earned_income_per_cap]):
         df = fn(df)
 
     return df
