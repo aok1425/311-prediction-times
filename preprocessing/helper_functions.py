@@ -1,4 +1,7 @@
+from __future__ import division
 import pandas as pd
+from sklearn.metrics import r2_score
+
 
 def dummify_cols_and_baselines(df, cols):
     baseline_cols = []
@@ -30,3 +33,10 @@ def remove_outliers_by_type(df, y_col, std_devs=3):
     df = df.copy()
     df.loc[:, y_col] = df[[y_col, 'TYPE']].groupby(group_column).transform(lambda g: replace(g, std_devs))
     return df.dropna(subset=[y_col])
+
+
+def adjusted_r2(y_true, y_pred, num_features):
+    r2 = r2_score(y_true, y_pred)
+    r2_q = 1 - r2
+    aa = num_features / (y_true.shape[0] - num_features - 1)
+    return r2 - r2_q * aa
