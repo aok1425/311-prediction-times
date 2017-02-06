@@ -46,6 +46,9 @@ def get_count_table(df):
     for col in ['SubmittedPhoto', 'is_description'] + type_cols:
         df_subset2[col] = df_subset2[col] / df_subset2['population_total']
 
+        # replaces w median for block groups where no people live, but where there are 311 issues
+        df_subset2[col] = df_subset2[col].replace(pd.np.inf, df_subset2[col].median())
+
     return df_subset2.drop('population_total', axis=1)
 
 
