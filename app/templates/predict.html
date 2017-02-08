@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block head %}
+<!-- Custom styles for this template -->
+<link href="{{ url_for('static', filename='./css/signin.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='./css/jquery-ui.min.css') }}" rel="stylesheet">
+
+{% endblock %}
+{% block body %}
+<body>
+
+<div class="container">
+
+	<form class="form-signin" role="form" id='demo'>
+		<h2 class="form-signin-heading">What type of issue?</h2>
+		<label class="sr-only">Type</label>
+		<select class='form-control' name='issue' id='issue'>
+			<option value="Abandoned Vehicles">Abandoned Vehicle</option>
+			<option value="Graffiti Removal">Graffiti Removal</option>
+			<option value="Heat - Excessive  Insufficient">Heat: Excessive or Insufficient</option>
+			<option value="Mice Infestation - Residential">Mice Infestation</option>
+			<option value="Needle Pickup">Needle Pickup</option>
+			<option value="Pick up Dead Animal">Pick up Dead Animal</option>
+			<option value="Request for Pothole Repair">Pothole Repair</option>
+		</select>
+
+		<br>
+
+		<h2 class="form-signin-heading">Input Source?</h2>
+		<label class="sr-only">InputSource</label>
+		<select class='form-control' name='source' id='source'>
+			<option value="Citizens Connect App">mobile app</option>
+			<option value="Self Service">website</option>	
+		</select>		
+
+		<br>
+
+		<h2 class="form-signin-heading">Neighborhood</h2>
+		<label class="sr-only">Neighborhood</label>
+		<select class='form-control' name='neighborhood' id='neighborhood'>
+			<option value="Allston / Brighton">Allston / Brighton</option>
+			<option value="Back Bay">Back Bay</option>
+			<option value="Beacon Hill">Beacon Hill</option>
+			<option value="Charlestown">Charlestown</option>
+			<option value="Dorchester">Dorchester</option>
+			<option value="Downtown / Financial District">Downtown</option>
+			<option value="East Boston">East Boston</option>
+			<option value="Fenway / Kenmore / Audubon Circle / Longwood">Fenway</option>
+			<option value="Hyde Park">Hyde Park</option>
+			<option value="Jamaica Plain">Jamaica Plain</option>
+			<option value="Mattapan">Mattapan</option>
+			<option value="Mission Hill">Mission Hill</option>
+			<option value="North End">North End</option>
+			<option value="Roslindale">Roslindale</option>
+			<option value="Roxbury">Roxbury</option>
+			<option value="South Boston">South Boston</option>
+			<option value="South Boston / South Boston Waterfront">South Boston Waterfront</option>
+			<option value="South End">South End</option>
+			<option value="West End">West End</option>
+			<option value="West Roxbury">West Roxbury</option>
+		</select>				
+
+		<br>
+
+		<button id='myBtn' class="btn btn-lg btn-primary btn-block" type="submit">Predict!</button>
+
+		<br>
+
+		<h3 class="form-signin-heading">It will take <span id='result'>____</span> hours</h3>
+
+	</div>
+
+</form>
+
+<!-- /container -->
+</body>
+<script src="{{ url_for('static', filename='./js/jquery-3.1.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='./js/jquery-ui.min.js') }}"></script>
+
+<script>
+document.getElementById("myBtn").addEventListener("click", function(event){
+	event.preventDefault();
+	var post_data = {
+		'issue': $('#issue').val(),
+		'source': $('#source').val(),
+		'neighborhood': $('#neighborhood').val()		
+	}
+	$.post( "/predict-results", post_data, function( data ) {
+	  $( "#result" ).html( data );
+	});
+});
+</script>
+{% endblock %}

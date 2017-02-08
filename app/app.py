@@ -1,67 +1,31 @@
 from __future__ import division
 from flask import Flask, session, redirect, url_for, escape, request, render_template
 import random
-from models import get_model, make_pred
+from models import get_model, make_pred, sample_row
 
 app = Flask(__name__)
-
 # app.permanent_session_lifetime = 60 * 60 * 1.5 # seconds, so 1.5 hours
+model = get_model()
 
-def assign_roles(database, num_mafia, num_sheriff, num_angel, columns):
-    """Takes in a database result, shuffles rows, chooses roles for each player, and updates the db."""
-    counters = {}
-    counters['Villager'] = [len(database) - num_mafia - num_sheriff - num_angel, 0]
-    counters['Mafia'] = [num_mafia, 0]
-    counters['Sheriff'] = [num_sheriff, 0]
-    counters['Angel'] = [num_angel, 0]
-
-    rows_to_remove = [] # very hacky. hopefully i replace this w a more elegant solution
-
-    random.shuffle(database)
-
-    for num, row in enumerate(database): # assign requested roles
-        for role in counters.keys():
-            if counters[role][columns.index('name')] < counters[role][columns.index('date_time')]:
-                if row[columns.index('preferred_role')] == role:
-                    row = database[num]
-                    rows_to_remove.append(row)
-                    date_time, name = row[:2]
-                    c.execute("update players set role = '{}' where date_time = {} and name = '{}'".format(role, date_time, name))
-                    counters[role][columns.index('name')] += 1
-
-    for row in rows_to_remove:
-        database.remove(row)
-
-    for role in counters.keys(): # randomly assign rest of roles
-        for i in range(counters[role][columns.index('date_time')] - counters[role][columns.index('name')]):
-            chosen_player = random.randint(0, len(database) - 1)
-            row = database.pop(chosen_player)
-            date_time, name = row[:2]
-            c.execute("update players set role = '{}' where date_time = {} and name = '{}'".format(role, date_time, name))
-
-    db.commit()
 
 @app.route('/')
 def start(): 
-    return render_template('create_or_join_game.html')
+    return render_template('home.html')
 
-@app.route('/create', methods=['GET', 'POST'])
-def create_game():
-    if request.method == 'POST':
-        session['game'] = request.form['game']
-        session['date_time'] = unix_time(datetime.datetime.now())
-        c.execute('''INSERT INTO games(date_time, game, phone_number) VALUES(?, ?, ?)''', (session['date_time'], session['game'], request.form['phone_number']))
-        db.commit()
 
-        return redirect(url_for('host'))
-    else:
-        c.execute('''SELECT date_time, game FROM games WHERE date_time >= ?''', (unix_time(datetime.datetime.now()) - 5 * 60,))
-        games = c.fetchall()        
+@app.route('/predict', methods=['GET', 'POST'])
+def predict():
+    return render_template('predict.html')
 
-        return render_template('create_game.html', current_games=games)
 
-@app.route('/choose', methods=['GET', 'POST'])
-def choose_game():
+@app.route('/predict-results', methods=['POST'])
+def predict_results():
+    pred = make_pred(request.form, model)
+    return str(pred)[:4]
+
+
+@app.route('/explore', methods=['GET', 'POST'])
+def explore():
     if request.method == 'POST':
         session['game'] = request.form.keys()[0] # revise HTML form to get value, not key 
         return redirect(url_for('login'))

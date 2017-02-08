@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block head %}
+{% endblock %}
+{% block body %}
+<body>
+
+<div class="container">
+
+	<div class="page-header">
+		<h1>Predict or explore?</h1>
+	</div>
+
+	<table class="table table-striped">
+		<tbody>
+			<tr>
+				<form action="{{ url_for('predict') }}">
+					<button type="submit" class="btn btn-primary btn-lg btn-block">Predict</button>
+				</form>
+				<form action="{{ url_for('explore') }}">
+					<button type="submit" class="btn btn-default btn-lg btn-block">Explore</button>
+				</form>
+			</tr>
+		</tbody>
+	</table>
+
+</div>
+
+<!-- /container -->
+</body>
+{% endblock %}
