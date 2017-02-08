@@ -52,6 +52,22 @@ def get_count_table(df):
     return df_subset2.drop('population_total', axis=1)
 
 
+def get_count_table(df):
+    df_subset = df[['tract_and_block_group']]
+    df_subset['NUM_ISSUES'] = 1
+
+    df_subset1 = df_subset.groupby('tract_and_block_group').sum().reset_index()
+    df_subset2 = add_population(df_subset1)
+
+    # this was to make per pop. it performed v badly on Lasso.
+    # df_subset2['NUM_ISSUES_PER_POP'] = df_subset2['NUM_ISSUES'] / df_subset2['population_total']
+    # df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
+    # df_subset2['NUM_ISSUES_PER_POP'] = df_subset2['NUM_ISSUES_PER_POP'].replace(pd.np.inf, pd.np.nan).fillna(df_subset2['NUM_ISSUES_PER_POP'].median())
+
+    # return df_subset2.drop('population_total', axis=1)
+    return df_subset2
+
+
 def group_table(df):
     mode_table = get_mode_table(df, ['Source', 'Property_Type'])
     count_table = get_count_table(df)
@@ -61,21 +77,23 @@ def group_table(df):
     new_df2 = new_df1.merge(count_table, on='tract_and_block_group', how='left')
 
     assert new_df2.Source.isnull().sum() == 0
-    assert new_df2.is_description.isnull().sum() == 0
+    # assert new_df2.is_description.isnull().sum() == 0
     return new_df2
 
 
 def removing_cols(df):
     cols_to_remove = ['CASE_ENQUIRY_ID', 'LOCATION_ZIPCODE', 'LATITUDE', 'LONGITUDE', 'description', 'COMPLETION_HOURS_LOG_10',
-        'queue_wk', 'queue_wk_open', 'OPEN_DT', 'CLOSED_DT']
+        'queue_wk', 'queue_wk_open', 'OPEN_DT', 'CLOSED_DT', 'SubmittedPhoto', 'TYPE', 'Source', 'Property_Type']
+    cols_to_remove = ['queue_wk', 'queue_wk_open', 'Source', 'Property_Type']        
     return df.drop(cols_to_remove, axis=1)
 
 
-def main(df):
-    df = removing_cols(df)
-    df = dummify(df, 'TYPE')
+def drop_duplicates(df):
+    return df.drop_duplicates()
 
-    for fn in [group_table]:
+
+def main(df):
+    for fn in [group_table, removing_cols, drop_duplicates]:
         df = fn(df)
 
     return df

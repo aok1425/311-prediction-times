@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='./css/toggle-switch-px.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='./css/toggle-switch-rem.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='./css/toggle-switch.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<body role="document">
+<div class="container theme-showcase" role="main">
+  <br>
+  {% if num_players > 0 %}
+  <div class="container">
+    <form action="{{ url_for('host') }}">
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Check for new players</button>
+    </form>
+  </div>
+
+  <div class="page-header">
+    <h1>{{ num_players }} people are playing:</h1>
+  </div>
+
+  <form method="post">
+
+    <div class='container'>
+      <div class="row">
+        <div class="col-lg-4">
+          {% for date_time, name, _, _, _ in players %}
+          <label class="switch-light progress progress-striped active" onclick="">
+            <input type="checkbox" name="{{ date_time }}" value={{ name }} checked/>
+            <span>
+              {{ name }}
+              <span>No</span>
+              <span>Yes</span>
+            </span>
+            <a class="progress-bar progress-bar-success"></a>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4">
+          <h3>How many Mafia?</h3>
+          <div class="switch-toggle well">
+            <input id="mafia1" name="mafia" type="radio" value={{ num_mafia[0] }} checked>
+            <label for="mafia1" onclick="">{{ num_mafia[0] }}</label>
+
+            <input id="mafia2" name="mafia" type="radio" value={{ num_mafia[1] }}>
+            <label for="mafia2" onclick="">{{ num_mafia[1] }}</label>
+            <a class="btn btn-primary disabled"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4">
+          <h3>How many Sheriffs?</h3>
+          <div class="switch-toggle well">
+            <input id="sheriff1" name="sheriff" type="radio" value={{ num_sheriff[0] }} checked>
+            <label for="sheriff1" onclick="">{{ num_sheriff[0] }}</label>
+
+            <input id="sheriff2" name="sheriff" type="radio" value={{ num_sheriff[1] }}>
+            <label for="sheriff2" onclick="">{{ num_sheriff[1] }}</label>
+            <a class="btn btn-primary disabled"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4">
+          <h3>How many Angels?</h3>
+          <div class="switch-toggle well">
+            <input id="angel1" name="angel" type="radio" value={{ num_angel[0] }} checked>
+            <label for="angel1" onclick="">{{ num_angel[0] }}</label>
+
+            <input id="angel2" name="angel" type="radio" value={{ num_angel[1] }}>
+            <label for="angel2" onclick="">{{ num_angel[1] }}</label>
+            <a class="btn btn-primary disabled"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='container'>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Assign roles</button>
+    </form>
+  </div>
+  <br></div>
+
+{% else %}
+
+<div class="page-header">
+  <h1>No one has signed up yet.</h1>
+</div>
+
+<div class="container">
+  <form action="{{ url_for('host') }}">
+    <button type="submit" class="btn btn-primary btn-lg btn-block" href=>Check for new players</button>
+  </form>
+</div>
+
+{% endif %}
+</div>
+<!-- /container -->
+
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='./js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='./js/docs.min.js') }}"></script>
+
+</body>
+{% endblock %}

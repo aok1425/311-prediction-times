@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block body %}
+<body role="document">
+
+<div class="container theme-showcase" role="main">
+
+  <div class="page-header">
+    <h1>These are the players' roles:</h1>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {% for num, date_time, name, role, preferred_role, _ in players %}
+            <td>{{ num }}</td>            
+            <td>{{ name }}</td>
+            {% if role == 'Mafia' %}
+            <td class='warning'>{{ role }}</td>
+            {% elif role == 'Villager' %}
+            <td class='active'>{{ role }}</td>
+            {% elif role == 'Sheriff' %}
+            <td class='success'>{{ role }}</td>
+            {% elif role == 'Angel' %}
+            <td class='success'>{{ role }}</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+<br>
+</body>
+    {% endblock %}

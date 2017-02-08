@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block body %}
+<body role="document">
+
+<div class="container theme-showcase" role="main">
+
+  <!-- Main jumbotron for a primary marketing message or call to action -->
+  <div class="jumbotron">
+    <h1>Thank you, {{ name }}.</h1>
+  </div>
+
+  <div class="page-header">
+    <h1>{{ num }} players are ready:</h1>
+  </div>
+  <div class="col-md-6">
+    <table class="table table-striped">
+      <tbody>
+        {% for date_time, name, _, _, _ in players %}
+        <tr>
+          <td>{{ name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+</div>
+<!-- /container -->
+<div class="container">
+
+<div class="starter-template">
+<p class='lead'>After the narrator has assigned roles,</p>
+
+<form action="{{ url_for('role') }}">
+  <button type="submit" class="btn btn-primary btn-lg btn-block" href=>View Role</button>
+</form>
+</div>
+<br>
+</div>
+<!-- /.container -->
+
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='./js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='./js/docs.min.js') }}"></script>
+
+</body>
+{% endblock %}
