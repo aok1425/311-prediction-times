@@ -26,14 +26,8 @@ def predict_results():
 
 @app.route('/explore', methods=['GET', 'POST'])
 def explore():
-    if request.method == 'POST':
-        session['game'] = request.form.keys()[0] # revise HTML form to get value, not key 
-        return redirect(url_for('login'))
-    else:
-        c.execute('''SELECT date_time, game FROM games WHERE date_time >= ?''', (unix_time(datetime.datetime.now()) - 5 * 60,))
-        games = c.fetchall()
+    return render_template('explore.html')
 
-        return render_template('choose_game.html', games=games)    
 
 @app.route('/signin')
 def signin():

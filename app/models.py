@@ -122,6 +122,10 @@ def get_model():
   return joblib.load('../data/model_completion_time.pkl')
 
 
+def get_model():
+  return joblib.load('model_completion_time.pkl')  
+
+
 def make_pred(request_form_dict, model):
   row = {'Source_Citizens Connect App': 0,
     'Source_Self Service': 0,
