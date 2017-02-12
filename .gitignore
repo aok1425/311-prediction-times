@@ -9,6 +9,7 @@ temp_case_descs.csv
 case_enquiry_ids.csv
 data_*.csv
 feat*.csv
+*tableau*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

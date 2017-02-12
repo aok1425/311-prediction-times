@@ -1,0 +1,13 @@
+Kinda useless to pred # of issues.
+What does it mean to have lotsa issues in a loc when there are 100+ types of issues?
+In busy areas, it means there's lotsa parking enforcement.
+And comparing that to the issues in a residential loc are like apples and oranges.
+
+If we make a model to simply pred # of issues,
+it will correl highly w high-traffic areas.
+
+A more useful model wld break down the categs into groups,
+prolly human-generated, but maybe also machine-generated,
+and then make sep models, 
+for eg, one for residential and one for business
+and then the locs w both (like Back Bay?) will just not be represented well in the analysis.
