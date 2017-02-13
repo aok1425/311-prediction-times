@@ -1,3 +1,6 @@
+# TODO: if I had more time, search Census for some measure of whether residnential or commerical
+# bc in fidi lotsa issues bc parking, non-residential stuff
+
 from __future__ import division
 import pandas as pd
 import shapegeocode
@@ -86,12 +89,15 @@ def get_count_table(df, by_year=False, weighted=False):
 
     df_subset2 = add_population(df_subset1)
 
-    # this was to make per pop. it performed v badly on Lasso.
-    # df_subset2['NUM_ISSUES_PER_POP'] = df_subset2['NUM_ISSUES'] / df_subset2['population_total']
-    # df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
-    # df_subset2['NUM_ISSUES_PER_POP'] = df_subset2['NUM_ISSUES_PER_POP'].replace(pd.np.inf, pd.np.nan).fillna(df_subset2['NUM_ISSUES_PER_POP'].median())
+    # NB: dividing by pop not that good bc eg high-density downtown has low pop
+    # better to have num_ppl_at_1pm or sth like that
 
-    # return df_subset2.drop('population_total', axis=1)
+    # this was to make per pop. it performed v badly on Lasso.
+    df_subset2['NUM_ISSUES_PER_100_POP'] = df_subset2['NUM_ISSUES'] * 100 / df_subset2['population_total']
+    # df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
+    df_subset2['NUM_ISSUES_PER_100_POP'] = df_subset2['NUM_ISSUES_PER_100_POP'].replace(pd.np.inf, pd.np.nan).fillna(df_subset2['NUM_ISSUES_PER_100_POP'].median())
+
+    return df_subset2.drop('population_total', axis=1)
     return df_subset2
 
 
@@ -177,5 +183,5 @@ def main(df, by_year=False, **kwargs):
 
 if __name__ == '__main__':
     df_orig = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')
-    df = main(df_orig, by_year=False, weighted=True)
+    df = main(df_orig, by_year=False, weighted=False)
     df.to_csv('../data/tableau_Q1_block_group_level.csv', index=False, encoding='utf-8')   
