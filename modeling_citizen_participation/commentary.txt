@@ -11,3 +11,16 @@ prolly human-generated, but maybe also machine-generated,
 and then make sep models, 
 for eg, one for residential and one for business
 and then the locs w both (like Back Bay?) will just not be represented well in the analysis.
+
+
+##
+
+hard to control for residential vs. commercial.
+if I had to manually choose which issues we care abt, that wld be v subj.
+so I shld not weight.
+
+too many confounding factors:
+	SB waterfront sees a lot of parking issues.
+	but ppl still live there.
+	the parking issues there might be diff from parking issues in Dot,
+	but they're under the same categ, and I don't have enough descs to distinguish btwn diff types of parking issues eg.
