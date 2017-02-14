@@ -105,7 +105,9 @@
                 var tract = features[0].properties.GEOID.slice(-7)
                 
                 document.getElementById('tooltip-name').innerHTML = "Tract " + tract;
-                document.getElementById('tooltip').innerHTML = fetch_results.responseJSON[tract];
+                var top_5_types = fetch_results.responseJSON[tract][2016]
+                
+                document.getElementById('tooltip').innerHTML = Object.values(top_5_types)[0];
                 //for troubleshooting - show complete features info
                 //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
             } else {
