@@ -1,5 +1,7 @@
 from sklearn.externals import joblib
 import pandas as pd
+from collections import defaultdict
+
 
 sample_row = {'Source_Citizens Connect App': 1,
   'Source_Self Service': 0,
@@ -261,6 +263,52 @@ def make_pred(request_form_dict, model):
   pred = model.predict(pd.DataFrame([row]))[0]
   print pred
   return pred
+
+
+def index_to_dict(lst):
+    d = {}
+    
+    for e in lst:
+        d[e['TYPE']] = e['num_issues']
+        
+    return d
+
+
+def store_in_dict(df_mini, d):
+    """Helper for make_top_n_dict"""
+    years =  df_mini.year.drop_duplicates()
+    assert years.shape[0] == 1
+    year = years.iloc[0]
+    
+    block_groups = df_mini.tract_and_block_group.drop_duplicates()
+    assert block_groups.shape[0] == 1
+    block_group = block_groups.iloc[0]
+    
+    d_ans = index_to_dict(df_mini.set_index(['year', 'tract_and_block_group']).to_dict('records'))
+    d[block_group][year] = d_ans
+
+
+def make_top_n_dict(n=5):
+  """For map, returns top 5 categs by year by loc"""
+  df = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')[['OPEN_DT', 'TYPE', 'tract_and_block_group']]
+  df['year'] = df.OPEN_DT.map(lambda x: x.year)
+  df.drop('OPEN_DT', inplace=True, axis=1)
+  df['num_issues'] = 1
+
+  ## starting the groupbys
+  aa = df[['year', 'tract_and_block_group', 'TYPE', 'num_issues']].sort_values(['year', 'tract_and_block_group'])
+
+  # http://stackoverflow.com/questions/27842613/pandas-groupby-sort-within-groups
+  df_agg = aa.groupby(['year', 'tract_and_block_group', 'TYPE']).count()
+  g = df_agg['num_issues'].groupby(level=[0,1], group_keys=False)
+  ans = g.nlargest(n)    
+
+  cc = ans.reset_index().sort_values(['year', 'tract_and_block_group'], ascending=[False, False])
+
+  ## putting into dict
+  d = defaultdict(defaultdict) # 2 levels
+  cc.groupby(['year', 'tract_and_block_group']).apply(lambda df_mini: store_in_dict(df_mini, d))
+  return d
 
 
 if __name__ == '__main__':

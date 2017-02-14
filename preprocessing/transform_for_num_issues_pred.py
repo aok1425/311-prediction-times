@@ -118,15 +118,15 @@ def make_dummies(row):
 
 
 def get_top_n_table(df, n=4):
+    """Gets the 5 most popular categs overall and returns table showing if ea categ is in census block for that yr"""
     df = df.copy()
     df['year'] = df.OPEN_DT.map(lambda x: x.year)    
     aa = df[['year', 'tract_and_block_group', 'TYPE', 'CASE_ENQUIRY_ID']]
     
     # http://stackoverflow.com/questions/27842613/pandas-groupby-sort-within-groups
     df_agg = aa.groupby(['year', 'tract_and_block_group', 'TYPE']).count()
-    g = df_agg['CASE_ENQUIRY_ID'].groupby(level=1, group_keys=False)
+    g = df_agg['CASE_ENQUIRY_ID'].groupby(level=[0,1], group_keys=False)
 
-    # this doesn't exactly do top n on ea groupby. shld investigate further
     ans = g.nlargest(n)    
 
     cc = ans.reset_index().sort_values(['year', 'tract_and_block_group'])
