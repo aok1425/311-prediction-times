@@ -1,6 +1,7 @@
 from sklearn.externals import joblib
 import pandas as pd
 from collections import defaultdict
+import json
 
 
 sample_row = {'Source_Citizens Connect App': 1,
@@ -309,6 +310,13 @@ def make_top_n_dict(n=5):
   d = defaultdict(defaultdict) # 2 levels
   cc.groupby(['year', 'tract_and_block_group']).apply(lambda df_mini: store_in_dict(df_mini, d))
   return d
+
+
+def make_top_n_dict(*args, **kwargs):
+  with open('static/top_5_types_by_yr_loc.json') as data_file:    
+    data = json.load(data_file)
+
+  return data
 
 
 if __name__ == '__main__':

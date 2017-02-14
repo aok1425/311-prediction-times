@@ -7,7 +7,7 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 CORS(app)
 # app.permanent_session_lifetime = 60 * 60 * 1.5 # seconds, so 1.5 hours
-model = get_model()
+# model = get_model() # temporary
 d_top_5 = make_top_n_dict()
 
 
