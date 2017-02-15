@@ -312,6 +312,7 @@ def make_top_n_dict(n=5):
   return d
 
 
+# TODO: uncomment the below
 def make_top_n_dict(*args, **kwargs):
   with open('static/top_5_types_by_yr_loc.json') as data_file:    
     data = json.load(data_file)

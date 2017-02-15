@@ -43,6 +43,7 @@
         <h1>Choropleth example using Mapbox GL js</h1>
         <h2>Population change, 1990-2000</h2>
         <div id="tooltip-name"></div>
+        <br>
         <div id='tooltip'></div>
     </div>
 
@@ -95,6 +96,31 @@
 
         var fetch_results = $.getJSON("http://alex-311.herokuapp.com/get-top-types")
 
+        function make_string_from_dict(dict, year = 2014) {
+            var string_result = "";
+
+            try {
+                var values = Object.entries(dict[year]);
+                values.sort(function(a,b){
+                    return b[1] - a[1];
+                });                
+            }
+            catch (TypeError) {
+                return 'No values for that year'
+            }
+
+            for (var i in values) {
+                var kv = values[i];
+                k = kv[0]
+                v = kv[1]
+                string_result += v
+                string_result += ' ' + k + '<br>'
+            }
+
+            return string_result;
+        }
+
+
         map.on("mousemove", function (e) {
             var features = map.queryRenderedFeatures(e.point, {
                 layers: ["tracts"]
@@ -104,10 +130,8 @@
                 //show name and value in sidebar
                 var tract = features[0].properties.GEOID.slice(-7)
                 
-                document.getElementById('tooltip-name').innerHTML = "Tract " + tract;
-                var top_5_types = fetch_results.responseJSON[tract][2016]
-                
-                document.getElementById('tooltip').innerHTML = Object.values(top_5_types)[0];
+                document.getElementById('tooltip-name').innerHTML = "Tract " + tract;                
+                document.getElementById('tooltip').innerHTML = make_string_from_dict(fetch_results.responseJSON[tract]);
                 //for troubleshooting - show complete features info
                 //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
             } else {
