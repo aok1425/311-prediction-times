@@ -275,6 +275,7 @@ def index_to_dict(lst):
     return d
 
 
+
 def store_in_dict(df_mini, d):
     """Helper for make_top_n_dict"""
     years =  df_mini.year.drop_duplicates()
