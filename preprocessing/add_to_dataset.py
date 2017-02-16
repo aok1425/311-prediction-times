@@ -100,13 +100,18 @@ def impute_earned_income_per_cap(df):
     return df
 
 
+def make_zips_strings(df):
+    df.zipcode = '0' + df.zipcode.astype(int).astype(str)
+    return df
+
+
 def main(input_path):
     df = pd.read_pickle(input_path)
 
     for fn in tqdm([convert_datetime, add_descriptions, add_completion_time,
         make_booleans, fill_nas, add_census_tract, add_queue_for_past_wk, add_queue_for_past_wk_open,
         add_census_data, adding_is_description, add_my_zipcodes, add_my_neighborhoods, transform_census_variables,
-        impute_earned_income_per_cap]):
+        impute_earned_income_per_cap, make_zips_strings]):
         df = fn(df)
 
     return df
