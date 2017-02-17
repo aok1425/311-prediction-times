@@ -1,6 +1,9 @@
 from __future__ import division
 import pandas as pd
 from sklearn.metrics import r2_score
+from IPython.display import Image
+from sklearn.tree import export_graphviz
+import subprocess
 
 
 def dummify_cols_and_baselines(df, cols):
@@ -78,3 +81,20 @@ def need_more_alphas(result_table):
             return True
     else:
         return False    
+
+
+def visualize_tree(tree, feature_names):
+    """Create tree png using graphviz.
+
+    Args
+    ----
+    tree -- scikit-learn DecsisionTree.
+    feature_names -- list of feature names.
+    """
+    with open("dt.dot", 'w') as f:
+        export_graphviz(tree, out_file=f, feature_names=feature_names)
+
+    command = ["dot", "-Tpng", "dt.dot", "-o", "dt.png"]
+    subprocess.check_call(command)
+        
+    return Image('dt.png')
