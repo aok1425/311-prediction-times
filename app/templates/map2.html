@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>Median Income by County</title>
+    <title>311 issue volume</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.19.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.19.0/mapbox-gl.css' rel='stylesheet' />
@@ -45,7 +45,7 @@
 <div class='sidebar pin-topleft z1 pad1'>
   <div class='sidebar-inner fill-white round lifted'>
     <header class='pad2'>
-      <h3>Median Income per County</h3>
+      <h3>Number of 311 issues by Census block group</h3>
       <div class="dropdown-menu">
         <select id="year">
           <option>2011</option>
@@ -60,25 +60,22 @@
     </header>
     <div id='info'></div>
     <div id='legend' class='legend quiet col12 clearfix round-bottom mobile-cols'>
-      <div class='strong micro pad1x pad0y col2 center round-bottomleft' style='background-color: rgba(255, 255, 255, 0.5)'>$20k</div>
-      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 204, 204, 0.5)'>$40k</div>
-      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 153, 153, 0.5)'>$60k</div>
-      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 102, 102, 0.5)'>$80k</div>
-      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 51, 51, 0.5)'>$100k</div>
-      <div class='strong micro pad1x pad0y col2 center round-bottomright' style='background-color: rgba(255, 0, 0, 0.5)'>$120k</div>
+      <div class='strong micro pad1x pad0y col2 center round-bottomleft' style='background-color: rgba(255, 255, 255, 0.5)' id=grp_0>0</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 204, 204, 0.5)' id=grp_1>94</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 153, 153, 0.5)' id=grp_2>187</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 102, 102, 0.5)' id=grp_3>281</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 51, 51, 0.5)' id=grp_4>374</div>
+      <div class='strong micro pad1x pad0y col2 center round-bottomright' style='background-color: rgba(255, 0, 0, 0.5)' id=grp_5>468</div>
     </div>
   </div>
 </div>
 
-<a class='pin-bottomleft z1 pad1' target='_blank' href='https://www.mapbox.com/'>
-  
-</a>
-
 <script>
 // Alex stuff
 var d_num_issues;
-var chosen_year = 2015;
+var chosen_year = "2015";
 var d_block_groups;
+var year_history = [];
 
 $.when(
     $.getJSON("http://alex-311.herokuapp.com/get-top-types", function(json) {
@@ -96,17 +93,57 @@ $.when(
 
 
 $("#year").click(function(){
+    year_history.push(chosen_year)
     chosen_year = this.value;
     for (var i in d_block_groups.features) {
         var feature = d_block_groups.features[i];
         feature.properties['total_num_issues'] = calc_total_num_issues(feature)
     }    
+
     map.removeSource('blocks');    
     map.addSource('blocks', {
         type: 'geojson',
         data: d_block_groups
     });    
+
+    var min_max_num_total_issues = get_min_max_num_total_issues(d_block_groups);
+
+    map.removeLayer(year_history[year_history.length - 1])
+    map.addLayer({
+        'id': chosen_year,
+        'type': 'fill',
+        'source': 'blocks',
+        'source-layer': 'blocks',
+        'paint': {
+            'fill-opacity': 0.5,
+            'fill-color': {
+                property: 'total_num_issues',
+                stops: [[min_max_num_total_issues[0], '#fff'], [min_max_num_total_issues[1], '#f00']]
+            }
+        }
+    }, 'waterway-label');    
+
+    var breakpoints = make_breakpoints(min_max_num_total_issues)
+
+    $( "#grp_0" ).html( breakpoints[0] )
+    $( "#grp_1" ).html( breakpoints[1] )
+    $( "#grp_2" ).html( breakpoints[2] )
+    $( "#grp_3" ).html( breakpoints[3] )
+    $( "#grp_4" ).html( breakpoints[4] )
+    $( "#grp_5" ).html( breakpoints[5] )
 });
+
+
+function make_breakpoints (start_end) {
+    var ans = []
+
+    for (i = 0; i < 6; i++) {
+        var num = Math.round((start_end[1] - start_end[0]) / 5 * i + start_end[0])
+        ans.push(num)
+    }    
+
+    return ans
+}
 
 
 function calc_total_num_issues (feature) {
@@ -116,7 +153,7 @@ function calc_total_num_issues (feature) {
 }
 
 
-function add_addtl_properties(feature) {
+function add_addtl_properties (feature) {
     var tract_and_block_group = feature.properties.GEOID.slice(-7);
     feature.properties.tract_and_block_group = tract_and_block_group;   
 
@@ -128,6 +165,7 @@ function add_addtl_properties(feature) {
 
 
 function get_min_max_num_total_issues (d_block_groups) {
+    // TODO: put this in a callback bc it fails on first load
     var total_num_issues = [];
     for (var i in d_block_groups.features) {
         num_issues = d_block_groups.features[i].properties.total_num_issues;
@@ -137,8 +175,9 @@ function get_min_max_num_total_issues (d_block_groups) {
     var max = Math.max.apply(null, total_num_issues); // get the max of the array
     total_num_issues.splice(total_num_issues.indexOf(max), 1); // remove max from the array
     var secondMax = Math.max.apply(null, total_num_issues); // get the 2nd max
+    var ans = [Math.min.apply(null, total_num_issues), secondMax];
 
-    return [Math.min.apply(null, total_num_issues), secondMax];
+    return ans;
 }
 
 
@@ -169,12 +208,12 @@ map.on('load', function() {
     var min_max_num_total_issues = get_min_max_num_total_issues(d_block_groups)
 
     map.addLayer({
-        'id': 'blocks',
+        'id': chosen_year,
         'type': 'fill',
         'source': 'blocks',
         'source-layer': 'blocks',
         'paint': {
-            'fill-opacity': 0.3,
+            'fill-opacity': 0.5,
             'fill-color': {
                 property: 'total_num_issues',
                 stops: [[min_max_num_total_issues[0], '#fff'], [min_max_num_total_issues[1], '#f00']]
@@ -194,7 +233,7 @@ map.on('load', function() {
     }, 'waterway-label');
 
     map.on('mousemove', function(e) {
-        var features = map.queryRenderedFeatures(e.point, { layers: ['blocks'] });
+        var features = map.queryRenderedFeatures(e.point, { layers: [chosen_year] });
         map.getCanvas().style.cursor = (features.length) ? 'default' : '';
         if (features.length) {
             var feature = features[0];

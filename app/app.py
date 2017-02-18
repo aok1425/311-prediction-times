@@ -38,6 +38,11 @@ def get_top_types():
     return jsonify(d_top_5) 
 
 
+@app.route('/map')
+def map():
+    return render_template('map2.html')    
+
+
 # set the secret key.  keep this really secret:
 app.secret_key = 'alex'
 
