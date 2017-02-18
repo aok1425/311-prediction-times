@@ -41,13 +41,32 @@
     <div id='map'></div>
     <div id='sidebar'>
         <h1>Choropleth example using Mapbox GL js</h1>
-        <h2>Population change, 1990-2000</h2>
+        <h2>Number of issues per capita for      
+            <div class="dropdown-menu">
+              <select id="year">
+                <option>2011</option>
+                <option>2012</option>
+                <option>2013</option>
+                <option>2014</option>
+                <option>2015</option>
+                <option>2016</option>
+                <option>2017</option>
+              </select>
+            </div>
+        </h2>
         <div id="tooltip-name"></div>
         <br>
         <div id='tooltip'></div>
     </div>
 
     <script>
+        var chosen_year;
+
+        $("#year").click(function(){
+            chosen_year = this.value;
+        });
+
+
         //replace with YOUR access token
         mapboxgl.accessToken = 'pk.eyJ1IjoiaHJlY2h0IiwiYSI6IlFwV2hZMlUifQ.dwfwZ5jzPU1xv2mYYVzXlQ';
 
@@ -60,8 +79,8 @@
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/light-v8',
-            zoom: 13,
-            center: [-71.043736, 42.320526]
+            zoom: 12,
+            center: [-71.062621, 42.327706]
         });
 
         // Add zoom and rotation controls to the map.
@@ -98,6 +117,7 @@
 
         function make_string_from_dict(dict, year = 2014) {
             var string_result = "";
+            var total_num = 0;
 
             try {
                 var values = Object.entries(dict[year]);
@@ -113,11 +133,12 @@
                 var kv = values[i];
                 k = kv[0]
                 v = kv[1]
+                total_num += v
                 string_result += v
                 string_result += ' ' + k + '<br>'
             }
 
-            return string_result;
+            return total_num + ' total' + '<br>' + string_result;
         }
 
 
@@ -131,7 +152,7 @@
                 var tract = features[0].properties.GEOID.slice(-7)
                 
                 document.getElementById('tooltip-name').innerHTML = "Tract " + tract;                
-                document.getElementById('tooltip').innerHTML = make_string_from_dict(fetch_results.responseJSON[tract]);
+                document.getElementById('tooltip').innerHTML = make_string_from_dict(fetch_results.responseJSON[tract], chosen_year);
                 //for troubleshooting - show complete features info
                 //document.getElementById('tooltip').innerHTML = JSON.stringify(features, null, 2);
             } else {

@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Median Income by County</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.19.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.19.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+    <style>
+    .sidebar { width:300px; }
+    .legend { background-color:#f1f1f0; }
+    .lifted { box-shadow:0 1px 2px rgba(0,0,0,0.10); }
+
+    /* Mobile */
+    @media only screen and (max-width:640px) {
+    .sidebar {
+      position:absolute;
+      width:100%;
+      padding:0;
+      margin:0;
+      top:auto;
+      bottom:0;
+      height:25%;
+      z-index:10;
+      }
+      .sidebar-inner {
+        height:100%;
+        border-radius:0;
+        }
+        .sidebar-inner > * { border-radius:0; }
+    .legend {
+      position:absolute;
+      bottom:0;
+      }
+    }
+    </style>
+</head>
+<body>
+
+<div id='map' class='col12 pin-top pin-bottom'></div>
+
+<div class='sidebar pin-topleft z1 pad1'>
+  <div class='sidebar-inner fill-white round lifted'>
+    <header class='pad2'>
+      <h3>Median Income per County</h3>
+      <div class="dropdown-menu">
+        <select id="year">
+          <option>2011</option>
+          <option>2012</option>
+          <option>2013</option>
+          <option>2014</option>
+          <option selected="selected">2015</option>
+          <option>2016</option>
+          <option>2017</option>
+        </select>
+      </div>      
+    </header>
+    <div id='info'></div>
+    <div id='legend' class='legend quiet col12 clearfix round-bottom mobile-cols'>
+      <div class='strong micro pad1x pad0y col2 center round-bottomleft' style='background-color: rgba(255, 255, 255, 0.5)'>$20k</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 204, 204, 0.5)'>$40k</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 153, 153, 0.5)'>$60k</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 102, 102, 0.5)'>$80k</div>
+      <div class='strong micro pad1x pad0y col2 center' style='background-color:rgba(255, 51, 51, 0.5)'>$100k</div>
+      <div class='strong micro pad1x pad0y col2 center round-bottomright' style='background-color: rgba(255, 0, 0, 0.5)'>$120k</div>
+    </div>
+  </div>
+</div>
+
+<a class='pin-bottomleft z1 pad1' target='_blank' href='https://www.mapbox.com/'>
+  
+</a>
+
+<script>
+// Alex stuff
+var d_num_issues;
+var chosen_year = 2015;
+var d_block_groups;
+
+$.when(
+    $.getJSON("http://alex-311.herokuapp.com/get-top-types", function(json) {
+        d_num_issues = json
+    })).done(function() {
+    $.getJSON("https://gist.githubusercontent.com/aok1425/97569284514de2d2206c22bcd56e99e7/raw/5b4c99b7bb2bcc561edaf99b00d1d513141add0b/boston_census_block_groups.geojson", function(response) {
+        d_block_groups = response;
+        for (var i in d_block_groups.features) {
+            var feature = d_block_groups.features[i];
+            feature = add_addtl_properties(feature)
+            feature.properties['total_num_issues'] = 555
+            // feature.properties['total_num_issues'] = calc_total_num_issues(feature)
+        }
+    });
+})
+
+
+$("#year").click(function(){
+    chosen_year = this.value;
+    for (var i in d_block_groups.features) {
+        var feature = d_block_groups.features[i];
+        feature.properties['total_num_issues'] = 333;        
+        // feature.properties['total_num_issues'] = calc_total_num_issues(feature)
+    }    
+});
+
+
+function calc_total_num_issues (feature) {
+  var d_issues = d_num_issues[feature.properties.tract_and_block_group]
+  var ans = get_total_num_issues(d_issues)
+  return ans  
+}
+
+
+function add_addtl_properties(feature) {
+    var tract_and_block_group = feature.properties.GEOID.slice(-7);
+    feature.properties.tract_and_block_group = tract_and_block_group;   
+
+    // feature.properties.loc = tract_and_block_group; 
+    feature.properties.loc = feature.properties.total_num_issues;
+    feature.properties.issues_dict = d_num_issues[tract_and_block_group];
+    return feature;
+}
+
+
+// mapbox stuff
+mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmp1MzNhMDBud3VvbHhqbjY1cnV2cCJ9.uGJJU2wgtXzcBNc62vY4_A';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v8',
+    zoom: 12,
+    center: [-71.062621, 42.327706]
+});
+
+var infoEl = document.getElementById('info');
+
+map.on('load', function() {
+
+    map.addSource('blocks', {
+        type: 'geojson',
+        data: d_block_groups
+    });
+
+    var source = new mapboxgl.GeoJSONSource({
+        data: {type: 'FeatureCollection', features: []}
+    });
+
+    map.addSource('blocks-hover', source);
+
+    map.addLayer({
+        'id': 'blocks',
+        'type': 'fill',
+        'source': 'blocks',
+        'source-layer': 'blocks',
+        'paint': {
+            'fill-opacity': 0.1,
+            'fill-color': {
+                property: 'ALAND',
+                stops: [[100000, '#fff'], [1000000, '#f00']]
+            }
+        }
+    }, 'waterway-label');
+
+    map.addLayer({
+        'id': 'blocks-hover',
+        'source': 'blocks-hover',
+        'type': 'line',
+        'paint': {
+            'line-color': '#f00',
+            'line-width': 2,
+            'line-blur': 2
+        }
+    }, 'waterway-label');
+
+    map.on('mousemove', function(e) {
+        var features = map.queryRenderedFeatures(e.point, { layers: ['blocks'] });
+        map.getCanvas().style.cursor = (features.length) ? 'default' : '';
+        if (features.length) {
+            var feature = features[0];
+            feature = add_addtl_properties(feature);
+            source.setData({type: 'FeatureCollection', features: [feature]});  
+            infoEl.innerHTML = getInfoHTML(feature.properties);
+        } else {
+            source.setData({type: 'FeatureCollection', features: []});
+            infoEl.innerHTML = '';
+        }
+    });
+});
+
+
+function getInfoHTML(properties) {
+    var container = document.createElement('div');
+    container.className = 'pad2 keyline-top';
+
+    var title = document.createElement('h3');
+    title.className = 'block space-bottom0';
+    title.textContent = 'tract & block group: ' + properties['loc'];
+
+    var income = document.createElement('div');
+    income.innerHTML = '<b>' + get_total_num_issues(properties['issues_dict']) + '</b>'+ ' total issues';
+
+    var population = document.createElement('div');
+    population.innerHTML = format_top_issues(properties['issues_dict']);
+
+    container.appendChild(title);
+    container.appendChild(income);
+    container.appendChild(population);
+
+    return container.outerHTML;
+}
+
+
+function get_total_num_issues(properties) {
+    var total_num = 0;
+
+    try {
+        var values = Object.entries(properties[chosen_year]);
+        values.sort(function(a,b){
+            return b[1] - a[1];
+        });                
+    }
+    catch (TypeError) {
+        return 'NA'
+    }
+
+    for (var i in values) {
+        total_num += values[i][1]
+
+    }
+
+    return total_num;
+}
+
+
+function format_top_issues(properties) {
+    var string_result = "";
+
+    try {
+        var values = Object.entries(properties[chosen_year]);
+        values.sort(function(a,b){
+            return b[1] - a[1];
+        });                
+    }
+    catch (TypeError) {
+        return 'NA'
+    }
+
+    for (var i in values) {
+        var kv = values[i];
+        k = kv[0]
+        v = kv[1]
+        string_result += '<b>' + v + '</b>' + ' ' + k + '<br>'
+    }
+
+    return string_result;
+}
+
+</script>
+
+</body>
+</html>
