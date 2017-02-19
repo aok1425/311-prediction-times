@@ -8,6 +8,9 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.19.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.19.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://use.fontawesome.com/4af43dee45.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>    
     <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
     <style>
     .sidebar { width:300px; }
@@ -36,6 +39,10 @@
       bottom:0;
       }
     }
+
+    .player{
+      margin: 50px 0;
+    }    
     </style>
 </head>
 <body>
@@ -54,9 +61,19 @@
           <option>2014</option>
           <option selected="selected">2015</option>
           <option>2016</option>
-          <option>2017</option>
         </select>
-      </div>      
+      </div> 
+      <div class="player text-center">          
+        <button type="button" id="button_bw" class="btn" onclick='buttonBackPress()'>
+          <i class="fa fa-backward"></i>
+        </button>
+        <button type="button" id="button_play" class="btn" onclick='buttonPlayPress()'>
+          <i class="fa fa-play"></i>
+        </button>           
+        <button type="button" id="button_fw" class="btn" onclick='buttonForwardPress(map)'>
+          <i class="fa fa-forward"></i>
+        </button>
+      </div>
     </header>
     <div id='info'></div>
     <div id='legend' class='legend quiet col12 clearfix round-bottom mobile-cols'>
@@ -71,6 +88,82 @@
 </div>
 
 <script>
+// Play controls stuff
+// http://codepen.io/superpikar/pen/zJsgH
+
+var state = 'stop';
+
+function buttonBackPress() {
+    console.log("button back invoked.");
+}
+
+function buttonForwardPress(map) {
+    console.log('hi')
+    year_history.push(chosen_year)
+    chosen_year = (parseInt(chosen_year) + 1).toString();
+    for (var i in d_block_groups.features) {
+        var feature = d_block_groups.features[i];
+        feature.properties['total_num_issues'] = calc_total_num_issues(feature)
+    }    
+
+    map.removeSource('blocks');    
+    map.addSource('blocks', {
+        type: 'geojson',
+        data: d_block_groups
+    });    
+
+    var min_max_num_total_issues = get_min_max_num_total_issues(d_block_groups);
+
+    map.removeLayer(year_history[year_history.length - 1])
+    map.addLayer({
+        'id': chosen_year,
+        'type': 'fill',
+        'source': 'blocks',
+        'source-layer': 'blocks',
+        'paint': {
+            'fill-opacity': 0.5,
+            'fill-color': {
+                property: 'total_num_issues',
+                stops: [[min_max_num_total_issues[0], '#fff'], [min_max_num_total_issues[1], '#f00']]
+            }
+        }
+    }, 'waterway-label');    
+
+    var breakpoints = make_breakpoints(min_max_num_total_issues)
+
+    $( "#grp_0" ).html( breakpoints[0] )
+    $( "#grp_1" ).html( breakpoints[1] )
+    $( "#grp_2" ).html( breakpoints[2] )
+    $( "#grp_3" ).html( breakpoints[3] )
+    $( "#grp_4" ).html( breakpoints[4] )
+    $( "#grp_5" ).html( breakpoints[5] )
+}
+
+function buttonPlayPress() {
+    if(state=='stop'){
+      state='play';
+      var button = d3.select("#button_play").classed('btn-success', true); 
+      button.select("i").attr('class', "fa fa-pause");  
+    }
+    else if(state=='play' || state=='resume'){
+      state = 'pause';
+      d3.select("#button_play i").attr('class', "fa fa-play"); 
+    }
+    else if(state=='pause'){
+      state = 'resume';
+      d3.select("#button_play i").attr('class', "fa fa-pause");        
+    }
+    console.log("button play pressed, play was "+state);
+}
+
+function buttonStopPress(){
+    state = 'stop';
+    var button = d3.select("#button_play").classed('btn-success', false);
+    button.select("i").attr('class', "fa fa-play");
+    console.log("button stop invoked.");    
+}
+
+
 // Alex stuff
 var d_num_issues;
 var chosen_year = "2015";
