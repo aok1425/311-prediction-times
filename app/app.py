@@ -1,7 +1,7 @@
 from __future__ import division
 from flask import Flask, session, redirect, url_for, escape, request, render_template, jsonify
 import random
-from models import get_model, make_pred, sample_row, make_top_n_dict
+from models import get_model, make_pred, sample_row, make_q1_map_json
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ CORS(app)
 # app.permanent_session_lifetime = 60 * 60 * 1.5 # seconds, so 1.5 hours
 # TODO: uncomment the below
 # model = get_model() # temporary
-d_top_5 = make_top_n_dict()
+q1_dict = make_q1_map_json()
 
 
 @app.route('/')
@@ -33,15 +33,25 @@ def explore():
     return render_template('explore.html')
 
 
-@app.route('/get-top-types')
+@app.route('/get-q1-top-types')
 def get_top_types():
-    return jsonify(d_top_5) 
+    return jsonify(q1_dict) 
 
 
 @app.route('/map')
 def map():
-    return render_template('map2.html')    
+    return render_template('map_q1.html')    
 
+
+@app.after_request
+def add_header(response):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
+    response.headers['Cache-Control'] = 'public, max-age=0'
+    return response
 
 # set the secret key.  keep this really secret:
 app.secret_key = 'alex'

@@ -321,6 +321,51 @@ def make_top_n_dict(*args, **kwargs):
   return data
 
 
+def make_total_issues_by_year(issues_by_year):
+    total_issues_by_year = {}
+
+    for k,v in issues_by_year.iteritems():
+        total_issues_by_year['total_issues_{}'.format(k)] = sum([vv for vv in v.values() if type(vv) == int])
+
+    return total_issues_by_year
+
+
+def add_geojson(top_n_dict):
+    """Returns dict, not JSON"""
+    with open("static/boston_census_block_groups.geojson") as data_file:    
+        geojson = json.load(data_file)    
+        
+    new_features = []
+
+    for feature in geojson['features']:
+        id_ = feature['properties']['tract_and_block_group']
+
+        if id_ in top_n_dict:
+            feature['properties']['issues_by_year'] = top_n_dict[id_]
+            feature['properties'].update(make_total_issues_by_year(feature['properties']['issues_by_year']))
+            new_features.append(feature)
+            
+    geojson['features'] = new_features
+    
+    return geojson
+
+
+def add_total_num_issues(top_n_dict_w_geojson):
+    return top_n_dict_w_geojson
+
+
+def add_num_issues_per_capita(some_dict):
+    return some_dict
+
+
+def make_q1_map_json():
+    d1 = make_top_n_dict()
+    d2 = add_geojson(d1)
+    d3 = add_total_num_issues(d2)
+    d4 = add_num_issues_per_capita(d3)
+    return d4
+
+
 if __name__ == '__main__':
   model = get_model()
   print make_pred(sample_row, model)
