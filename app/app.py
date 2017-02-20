@@ -38,12 +38,12 @@ def get_top_types():
     return jsonify(q1_dict) 
 
 
-@app.route('/map')
+@app.route('/map2')
 def map():
     return render_template('map_q1.html')    
 
 
-@app.route('/map2')
+@app.route('/map')
 def map_per_1000():
     return render_template('map_q1_per_1000.html')   
 
