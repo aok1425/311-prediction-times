@@ -122,9 +122,11 @@ function make_breakpoints (start_end) {
 function get_min_max_num_total_issues (data) {
     var total_num_issues = [];
     for (var i in data.features) {
-        num_issues = data.features[i]['properties']['total_issues_' + chosen_year];
+        var num_issues = data.features[i]['properties']['total_issues_' + chosen_year];
         total_num_issues.push(num_issues);
     }
+
+    total_num_issues = total_num_issues.filter(Boolean) // bc 2011 has some NaNs
 
     var max = Math.max.apply(null, total_num_issues); // get the max of the array
     total_num_issues.splice(total_num_issues.indexOf(max), 1); // remove max from the array
