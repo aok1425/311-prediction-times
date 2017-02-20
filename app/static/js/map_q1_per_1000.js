@@ -131,10 +131,11 @@ function get_min_max_num_total_issues (data) {
 
     total_num_issues = total_num_issues.filter(Boolean) // bc 2011 has some NaNs
 
-    for (var _ in [1,2,3,4]) { // removing top 4
-        var max = Math.max.apply(null, total_num_issues); // get the max of the array
-        total_num_issues.splice(total_num_issues.indexOf(max), 1); // remove max from the array        
-    } 
+    // var n = 5 // removing top N
+    // for (var i = 1; i <= n; i++) { 
+    //     var max = Math.max.apply(null, total_num_issues); // get the max of the array
+    //     total_num_issues.splice(total_num_issues.indexOf(max), 1); // remove max from the array        
+    // } 
         
     var secondMax = Math.max.apply(null, total_num_issues);
     var ans = [Math.min.apply(null, total_num_issues), secondMax];
@@ -162,7 +163,7 @@ function getInfoHTML(properties_orig) {
 
     var title = document.createElement('h3');
     title.className = 'block space-bottom0';
-    title.textContent = 'tract & block group: ' + properties['tract_and_block_group'];
+    title.textContent = 'population: ' + properties['pop'];
 
     var income = document.createElement('div');
     // income.innerHTML = '<b>' + properties['total_issues_' + chosen_year] + '</b>'+ ' total issues';

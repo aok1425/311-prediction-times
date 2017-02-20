@@ -8,6 +8,9 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname('.'), "../preprocessing"))
 from transform_for_num_issues_pred import add_population
 
+BLOCK_GROUP_BLACKLIST = ["9807001", "9818001", "0303003", "0701018", "9811003"] # these are parks or South Station
+OUTLIERS_COMMERCIAL_INDUSTRIAL = ['0102034', '0107013', '0512001', '0612002', '0701012', '1101033', '9812021']
+OUTLIERS_LOW_POP = ['0005024', '0008032', '0103002', '0104051']
 
 sample_row = {'Source_Citizens Connect App': 1,
   'Source_Self Service': 0,
@@ -407,6 +410,8 @@ def make_q1_json(*args, **kwargs):
   return data
 
 
+# TODO: fix the names of the below; maybe put into class or module
+
 def make_total_issues_by_year(issues_by_year):
     total_issues_by_year = {}
 
@@ -441,7 +446,7 @@ def add_geojson(top_dict, population_dict):
     for feature in geojson['features']:
         id_ = feature['properties']['tract_and_block_group']
 
-        if id_ in top_dict['top_n_by_yr']:
+        if id_ in top_dict['top_n_by_yr'] and id_ not in BLOCK_GROUP_BLACKLIST + OUTLIERS_LOW_POP + OUTLIERS_COMMERCIAL_INDUSTRIAL:
             feature['properties']['issues_by_year'] = top_dict['top_n_by_yr'][id_]
             feature['properties'].update(make_total_issues_by_year(top_dict['top_n_by_yr_totals'][id_]))            
             feature['properties']['total_issues_all_years'] = top_dict['top_n_all_yrs_totals'][id_]
