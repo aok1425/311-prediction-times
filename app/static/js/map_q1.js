@@ -1,38 +1,40 @@
-// Play controls stuff
-// http://codepen.io/superpikar/pen/zJsgH
-var state = 'stop';
+// // Play controls stuff
+// // http://codepen.io/superpikar/pen/zJsgH
+// var state = 'stop';
 
-function buttonBackPress() {
-    console.log("button back invoked.");
-}
+// function buttonBackPress() {
+//     console.log("button back invoked.");
+// }
 
-function buttonForwardPress(map) {
-    console.log('hi')
-}
+// function buttonForwardPress(map) {
+// 	// incomplete
+// 	chosen_year = (parseInt(chosen_year) + 1).toString();
+// 	change_year(first_run=false);
+// }
 
-function buttonPlayPress() {
-    if(state=='stop'){
-      state='play';
-      var button = d3.select("#button_play").classed('btn-success', true); 
-      button.select("i").attr('class', "fa fa-pause");  
-    }
-    else if(state=='play' || state=='resume'){
-      state = 'pause';
-      d3.select("#button_play i").attr('class', "fa fa-play"); 
-    }
-    else if(state=='pause'){
-      state = 'resume';
-      d3.select("#button_play i").attr('class', "fa fa-pause");        
-    }
-    console.log("button play pressed, play was "+state);
-}
+// function buttonPlayPress() {
+//     if(state=='stop'){
+//       state='play';
+//       var button = d3.select("#button_play").classed('btn-success', true); 
+//       button.select("i").attr('class', "fa fa-pause");  
+//     }
+//     else if(state=='play' || state=='resume'){
+//       state = 'pause';
+//       d3.select("#button_play i").attr('class', "fa fa-play"); 
+//     }
+//     else if(state=='pause'){
+//       state = 'resume';
+//       d3.select("#button_play i").attr('class', "fa fa-pause");        
+//     }
+//     console.log("button play pressed, play was "+state);
+// }
 
-function buttonStopPress(){
-    state = 'stop';
-    var button = d3.select("#button_play").classed('btn-success', false);
-    button.select("i").attr('class', "fa fa-play");
-    console.log("button stop invoked.");    
-}
+// function buttonStopPress(){
+//     state = 'stop';
+//     var button = d3.select("#button_play").classed('btn-success', false);
+//     button.select("i").attr('class', "fa fa-play");
+//     console.log("button stop invoked.");    
+// }
 
 
 // functions
@@ -156,9 +158,12 @@ function getInfoHTML(properties_orig) {
 
     var income = document.createElement('div');
     income.innerHTML = '<b>' + properties['total_issues_' + chosen_year] + '</b>'+ ' total issues';
+    // income.innerHTML = '<b>' + properties['issues_all_years_totals'] + '</b>'+ ' total issues';    
 
     var population = document.createElement('div');
     population.innerHTML = format_top_issues(properties['issues_by_year']);
+    // population.innerHTML = format_top_issues(properties['issues_all_years']);
+
 
     container.appendChild(title);
     container.appendChild(income);
