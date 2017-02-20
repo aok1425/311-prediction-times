@@ -43,6 +43,11 @@ def map():
     return render_template('map_q1.html')    
 
 
+@app.route('/map2')
+def map_per_1000():
+    return render_template('map_q1_per_1000.html')   
+
+
 @app.after_request
 def add_header(response):
     """

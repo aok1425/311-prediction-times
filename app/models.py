@@ -424,7 +424,7 @@ def transform_issues_by_year_per_1000(d, population_dict, tract_and_block_group)
         try:
           new_value = int(round(issue_v / population_dict[tract_and_block_group] * 1000))
         except OverflowError:
-          new_value = 9999999
+          new_value = None
 
         new_d[year][issue_k] = new_value
 
@@ -459,7 +459,7 @@ def add_geojson(top_dict, population_dict):
               try:
                 new_value = int(round(feature['properties'][col] / population_dict[id_] * 1000))
               except OverflowError:
-                new_value = 9999999              
+                new_value = None              
               feature['properties'][col + '_per_1000'] = new_value
 
             new_features.append(feature)
