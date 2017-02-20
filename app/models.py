@@ -127,12 +127,12 @@ sample_row = {'Source_Citizens Connect App': 1,
 
 
 def get_model():
-  return joblib.load('../data/model_completion_time.pkl')
+  return joblib.load('model_completion_time.pkl') 
 
 
 def get_model():
-  return joblib.load('model_completion_time.pkl')  
-
+  return joblib.load('../data/model_completion_time.pkl')
+ 
 
 def make_pred(request_form_dict, model):
   row = {'Source_Citizens Connect App': 0,
@@ -280,7 +280,6 @@ def index_to_dict(lst):
     return d
 
 
-
 def store_in_dict(df_mini, d):
     """Helper for make_top_n_dict"""
     years =  df_mini.year.drop_duplicates()
@@ -306,6 +305,8 @@ def store_in_dict_for_all_yrs(df_mini, d):
 
 
 def make_top_n_dict_for_all_yrs(df, n=5):
+  # TODO: this shld be the same as transform_for_num_issues_pred.main()
+  # make a single source of truth
   """
   For map, returns top 5 categs by year by loc
 
@@ -469,10 +470,6 @@ def add_geojson(top_dict, population_dict):
     geojson['features'] = new_features
     
     return geojson
-
-
-def add_num_issues_per_capita(some_dict):
-    return some_dict
 
 
 def make_q1_map_json():

@@ -48,21 +48,6 @@ def get_mode_table(df, cols):
     return df[cols + ['tract_and_block_group']].groupby('tract_and_block_group').agg(lambda row: row.value_counts().index[0]).reset_index()    
 
 
-def get_weighted_ys(df):
-    """For num_issues, assigns weight to type so that we can compare block groups w/o worrying about TYPE"""
-    num_issues_total = df.shape[0]
-    df_num_issues_by_type = df[['TYPE', 'CASE_ENQUIRY_ID']].groupby('TYPE').count().sort_values('CASE_ENQUIRY_ID', ascending=False)
-    df_num_issues_by_type['proportion'] = df_num_issues_by_type.CASE_ENQUIRY_ID / num_issues_total
-    d_proportion = df_num_issues_by_type['proportion'].to_dict()    
-
-    df1 = df[['TYPE', 'CASE_ENQUIRY_ID', 'tract_and_block_group']].groupby(['tract_and_block_group', 'TYPE']).count().reset_index()
-    df1['NUM_ISSUES_WEIGHTED'] = df1.TYPE.map(d_proportion) * df1.CASE_ENQUIRY_ID
-
-    df2 = df1[['tract_and_block_group', 'NUM_ISSUES_WEIGHTED']].groupby('tract_and_block_group').sum().reset_index()
-
-    return df2
-
-
 def get_count_table(df):
     type_cols = [col for col in df.columns if 'TYPE' in col]
     df_subset = df[['tract_and_block_group', 'SubmittedPhoto', 'is_description'] + type_cols]
@@ -80,9 +65,8 @@ def get_count_table(df):
     return df_subset2.drop('population_total', axis=1)
 
 
-def get_count_table(df, by_year=False, weighted=False):
+def get_count_table(df, by_year=False):
     if by_year:
-        assert weighted is False
         df_subset = df[['tract_and_block_group', 'OPEN_DT']]
         df_subset['year'] = df_subset.OPEN_DT.map(lambda x: x.year)
         df_subset.drop('OPEN_DT', axis=1, inplace=True)
@@ -92,26 +76,18 @@ def get_count_table(df, by_year=False, weighted=False):
         df_subset = df[['tract_and_block_group']]
         df_subset['NUM_ISSUES'] = 1
         df_subset1 = df_subset.groupby('tract_and_block_group').sum().reset_index()        
-        
-        if weighted:
-            df_subset1 = df_subset1.merge(get_weighted_ys(df), on='tract_and_block_group', how='left')
-            assert df_subset1.NUM_ISSUES_WEIGHTED.isnull().sum() == 0
 
     df_subset2 = add_population(df_subset1)
-
-    # NB: dividing by pop not that good bc eg high-density downtown has low pop
-    # better to have num_ppl_at_1pm or sth like that
-
-    # this was to make per pop. it performed v badly on Lasso.
-    df_subset2['NUM_ISSUES_PER_100_POP'] = df_subset2['NUM_ISSUES'] * 100 / df_subset2['population_total']
-    # df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
-    df_subset2['NUM_ISSUES_PER_100_POP'] = df_subset2['NUM_ISSUES_PER_100_POP'].replace(pd.np.inf, pd.np.nan).fillna(df_subset2['NUM_ISSUES_PER_100_POP'].median())
+    df_subset2['NUM_ISSUES_PER_1000_POP'] = df_subset2['NUM_ISSUES'] * 1000 / df_subset2['population_total']
+    df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
+    # df_subset2['NUM_ISSUES_PER_1000_POP'] = df_subset2['NUM_ISSUES_PER_1000_POP'].replace(pd.np.inf, pd.np.nan).fillna(df_subset2['NUM_ISSUES_PER_1000_POP'].median())
 
     return df_subset2.drop('population_total', axis=1)
     return df_subset2
 
 
 def make_dummies(row):
+    # not sure what this is being used for. maybe statsmodels.
     l = ['Request for Snow Plowing',
          'Schedule a Bulk Item Pickup',
          'Parking Enforcement',
