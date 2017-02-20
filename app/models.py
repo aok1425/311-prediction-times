@@ -6,11 +6,8 @@ import json
 
 import os, sys
 sys.path.append(os.path.join(os.path.dirname('.'), "../preprocessing"))
-from transform_for_num_issues_pred import add_population
+from transform_for_num_issues_pred import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP
 
-BLOCK_GROUP_BLACKLIST = ["9807001", "9818001", "0303003", "0701018", "9811003"] # these are parks or South Station
-OUTLIERS_COMMERCIAL_INDUSTRIAL = ['0102034', '0107013', '0512001', '0612002', '0701012', '1101033', '9812021']
-OUTLIERS_LOW_POP = ['0005024', '0008032', '0103002', '0104051']
 
 sample_row = {'Source_Citizens Connect App': 1,
   'Source_Self Service': 0,

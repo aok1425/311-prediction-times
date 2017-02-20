@@ -9,6 +9,11 @@ import re
 from tqdm import tqdm
 
 
+BLOCK_GROUP_BLACKLIST = ["9807001", "9818001", "0303003", "0701018", "9811003"] # these are parks or South Station
+OUTLIERS_COMMERCIAL_INDUSTRIAL = ['0102034', '0107013', '0512001', '0612002', '0701012', '1101033', '9812021']
+OUTLIERS_LOW_POP = ['0005024', '0008032', '0103002', '0104051']
+
+
 def dummify(df, column, keep_baseline=False):
     # from Darren's linear regression slides   
     if keep_baseline:
@@ -179,8 +184,15 @@ def drop_duplicates(df, **kwargs):
     return df.drop_duplicates()
 
 
+def drop_outliers(df, **kwargs):
+    outliers = OUTLIERS_LOW_POP + OUTLIERS_COMMERCIAL_INDUSTRIAL + BLOCK_GROUP_BLACKLIST
+    df1 = df[~df.tract_and_block_group.isin(outliers)]
+    assert df.shape != df1.shape
+    return df1
+
+
 def main(df, by_year=False, **kwargs):
-    for fn in [group_table, removing_cols, drop_duplicates]:
+    for fn in [group_table, removing_cols, drop_duplicates, drop_outliers]:
         df = fn(df, by_year=by_year, **kwargs)
 
     return df
