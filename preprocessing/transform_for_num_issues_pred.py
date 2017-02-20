@@ -21,13 +21,18 @@ def dummify(df, column, keep_baseline=False):
     return pd.concat([df,dummy],axis=1)
 
 
-def add_population(df):
+def add_population(df, just_dict=False):
     # will use race_total as proxy for pop for Census block group
+    # just_dict is for making the API endpoint
     df_pop = pd.read_csv('../data/census-data/ACS_15_5YR_B03002_with_ann.csv', header=1)
     df_pop.insert(0, 'tract_and_block_group', df_pop['Id2'].apply(lambda id_: str(id_)[-7:]))
     df_pop = df_pop[['tract_and_block_group', 'Estimate; Total:']]
     df_pop = df_pop.rename(index=str, columns={'Estimate; Total:': 'population_total'})
     
+    if just_dict:
+        ans = df_pop.set_index('tract_and_block_group')['population_total'].to_dict()
+        return ans
+
     new_df = pd.merge(df, df_pop, on='tract_and_block_group', how='left')
 
     return new_df

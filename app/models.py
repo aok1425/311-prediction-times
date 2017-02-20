@@ -1,7 +1,12 @@
+from __future__ import division
 from sklearn.externals import joblib
 import pandas as pd
 from collections import defaultdict
 import json
+
+import os, sys
+sys.path.append(os.path.join(os.path.dirname('.'), "../preprocessing"))
+from transform_for_num_issues_pred import add_population
 
 
 sample_row = {'Source_Citizens Connect App': 1,
@@ -411,7 +416,22 @@ def make_total_issues_by_year(issues_by_year):
     return total_issues_by_year
 
 
-def add_geojson(top_dict):
+def transform_issues_by_year_per_1000(d, population_dict, tract_and_block_group):
+    new_d = defaultdict(defaultdict)
+
+    for year in d:
+      for issue_k, issue_v in d[year].iteritems():
+        try:
+          new_value = int(round(issue_v / population_dict[tract_and_block_group] * 1000))
+        except OverflowError:
+          new_value = 9999999
+
+        new_d[year][issue_k] = new_value
+
+    return new_d
+
+
+def add_geojson(top_dict, population_dict):
     """Returns dict, not JSON"""
     with open("static/boston_census_block_groups.geojson") as data_file:    
         geojson = json.load(data_file)    
@@ -425,15 +445,28 @@ def add_geojson(top_dict):
             feature['properties']['issues_by_year'] = top_dict['top_n_by_yr'][id_]
             feature['properties'].update(make_total_issues_by_year(top_dict['top_n_by_yr_totals'][id_]))            
             feature['properties']['total_issues_all_years'] = top_dict['top_n_all_yrs_totals'][id_]
+
+            feature['properties']['issues_by_year_per_1000'] = transform_issues_by_year_per_1000(
+                feature['properties']['issues_by_year'],
+                population_dict,
+                id_
+            )
+
+            # import ipdb; ipdb.set_trace()
+            feature['properties']['pop'] = population_dict[id_]
+
+            for col in [col for col in feature['properties'] if 'total_issues_' in col]:
+              try:
+                new_value = int(round(feature['properties'][col] / population_dict[id_] * 1000))
+              except OverflowError:
+                new_value = 9999999              
+              feature['properties'][col + '_per_1000'] = new_value
+
             new_features.append(feature)
             
     geojson['features'] = new_features
     
     return geojson
-
-
-def add_total_num_issues(top_n_dict_w_geojson):
-    return top_n_dict_w_geojson
 
 
 def add_num_issues_per_capita(some_dict):
@@ -442,9 +475,8 @@ def add_num_issues_per_capita(some_dict):
 
 def make_q1_map_json():
     d1 = make_q1_json()
-    d2 = add_geojson(d1)
-    # d3 = add_total_num_issues(d2)
-    # d4 = add_num_issues_per_capita(d3)
+    population_dict = add_population(df=None, just_dict=True)
+    d2 = add_geojson(d1, population_dict)
     return d2
 
 

@@ -160,11 +160,11 @@ function getInfoHTML(properties_orig) {
 
     var income = document.createElement('div');
     income.innerHTML = '<b>' + properties['total_issues_' + chosen_year] + '</b>'+ ' total issues';
-    // income.innerHTML = '<b>' + properties['issues_all_years_totals'] + '</b>'+ ' total issues';    
+    // income.innerHTML = '<b>' + properties['total_issues_' + chosen_year + '_per_1000'] + '</b>'+ ' total issues';
 
     var population = document.createElement('div');
     population.innerHTML = format_top_issues(properties['issues_by_year']);
-    // population.innerHTML = format_top_issues(properties['issues_all_years']);
+    // population.innerHTML = format_top_issues(properties['issues_by_year_per_1000']);
 
 
     container.appendChild(title);
