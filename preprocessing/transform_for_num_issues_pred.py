@@ -79,54 +79,11 @@ def get_count_table(df, by_year=False):
 
     df_subset2 = add_population(df_subset1)
     df_subset2['NUM_ISSUES_PER_1000_POP'] = df_subset2['NUM_ISSUES'] * 1000 / df_subset2['population_total']
-    df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
+    # df_subset2.drop('NUM_ISSUES', axis=1, inplace=True)
     # df_subset2['NUM_ISSUES_PER_1000_POP'] = df_subset2['NUM_ISSUES_PER_1000_POP'].replace(pd.np.inf, pd.np.nan).fillna(df_subset2['NUM_ISSUES_PER_1000_POP'].median())
 
-    return df_subset2.drop('population_total', axis=1)
+    # return df_subset2.drop('population_total', axis=1)
     return df_subset2
-
-
-def make_dummies(row):
-    # not sure what this is being used for. maybe statsmodels.
-    l = ['Request for Snow Plowing',
-         'Schedule a Bulk Item Pickup',
-         'Parking Enforcement',
-         'Missed Trash/Recycling/Yard Waste/Bulk Item',
-         'Graffiti Removal']    
-    
-    for col in l:
-        if row['TYPE'] == col:
-            row[col.replace(' ', '').replace('/', '')] = True
-        else:
-            row[col.replace(' ', '').replace('/', '')] = False
-            
-    return row    
-
-
-def get_top_n_table(df, n=4):
-    """Gets the 5 most popular categs overall and returns table showing if ea categ is in census block for that yr"""
-    df = df.copy()
-    df['year'] = df.OPEN_DT.map(lambda x: x.year)    
-    aa = df[['year', 'tract_and_block_group', 'TYPE', 'CASE_ENQUIRY_ID']]
-    
-    # http://stackoverflow.com/questions/27842613/pandas-groupby-sort-within-groups
-    df_agg = aa.groupby(['year', 'tract_and_block_group', 'TYPE']).count()
-    g = df_agg['CASE_ENQUIRY_ID'].groupby(level=[0,1], group_keys=False)
-
-    ans = g.nlargest(n)    
-
-    cc = ans.reset_index().sort_values(['year', 'tract_and_block_group'])
-    top_n = cc[['TYPE', 'year']].groupby('TYPE').count().sort_values('year', ascending=False).reset_index().head().TYPE.tolist()
-
-    trans_groupbys = lambda rows: rows.apply(make_dummies, axis=1)
-    ans2 = cc.groupby(['year', 'tract_and_block_group']).apply(trans_groupbys) \
-        [['year', 'tract_and_block_group', 'RequestforSnowPlowing', 'ScheduleaBulkItemPickup', 'ParkingEnforcement', \
-        'MissedTrashRecyclingYardWasteBulkItem', 'GraffitiRemoval']].drop_duplicates()
-
-    # hopefully the NAs are only in the dummy cols. too lazy to write more specific
-    ans2.fillna(False, inplace=True)
-
-    return ans2
 
 
 def group_table(df, by_year=False, **kwargs):
@@ -152,12 +109,16 @@ def group_table(df, by_year=False, **kwargs):
 def removing_cols(df, **kwargs):
     cols_to_remove = ['CASE_ENQUIRY_ID', 'LOCATION_ZIPCODE', 'LATITUDE', 'LONGITUDE', 'description', 'COMPLETION_HOURS_LOG_10',
         'queue_wk', 'queue_wk_open', 'OPEN_DT', 'CLOSED_DT', 'SubmittedPhoto', 'TYPE', 'Source', 'Property_Type']
-    cols_to_remove = ['queue_wk', 'queue_wk_open', 'Source', 'Property_Type']        
+    cols_to_remove = ['queue_wk', 'queue_wk_open', 'Source', 'Property_Type']  
+    cols_to_remove = ['CASE_ENQUIRY_ID', 'LOCATION_ZIPCODE', 'LATITUDE', 'LONGITUDE', 'description', 'COMPLETION_HOURS_LOG_10',
+        'queue_wk', 'queue_wk_open', 'OPEN_DT', 'CLOSED_DT', 'SubmittedPhoto', 'TYPE', 'zipcode', 'neighborhood_from_zip']          
     return df.drop(cols_to_remove, axis=1)
 
 
-def drop_duplicates(df, **kwargs):
-    return df.drop_duplicates()
+def assert_no_duplicates(df, **kwargs):
+    df1 = df.drop_duplicates()
+    assert df.shape == df1.shape
+    return df
 
 
 def drop_outliers(df, **kwargs):
@@ -168,7 +129,7 @@ def drop_outliers(df, **kwargs):
 
 
 def main(df, by_year=False, **kwargs):
-    for fn in [group_table, removing_cols, drop_duplicates, drop_outliers]:
+    for fn in [removing_cols, group_table, assert_no_duplicates, drop_outliers]:
         df = fn(df, by_year=by_year, **kwargs)
 
     return df
@@ -176,5 +137,5 @@ def main(df, by_year=False, **kwargs):
 
 if __name__ == '__main__':
     df_orig = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')
-    df = main(df_orig, by_year=False, weighted=False)
+    df = main(df_orig, by_year=False)
     df.to_csv('../data/tableau_Q1_block_group_level.csv', index=False, encoding='utf-8')   
