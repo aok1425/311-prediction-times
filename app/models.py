@@ -3,11 +3,7 @@ from sklearn.externals import joblib
 import pandas as pd
 from collections import defaultdict
 import json
-
-import os, sys
-sys.path.append(os.path.join(os.path.dirname('.'), "../preprocessing"))
-from transform_for_num_issues_pred import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP, OUTLIERS_POP_0
-from transform_for_num_issues_pred import main as transform_dataset
+from utilities import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP, OUTLIERS_POP_0, transform_dataset
 
 
 sample_row = {'Source_Citizens Connect App': 1,
