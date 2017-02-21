@@ -6,7 +6,8 @@ import json
 
 import os, sys
 sys.path.append(os.path.join(os.path.dirname('.'), "../preprocessing"))
-from transform_for_num_issues_pred import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP
+from transform_for_num_issues_pred import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP, OUTLIERS_POP_0
+from transform_for_num_issues_pred import main as transform_dataset
 
 
 sample_row = {'Source_Citizens Connect App': 1,
@@ -390,8 +391,8 @@ def incorporate_totals_into_orig_dict(d, d_totals_by_yr):
   return d
 
 
-def make_q1_json():
-  df = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')[['OPEN_DT', 'TYPE', 'tract_and_block_group']]
+def make_q1_json(df_orig):
+  df = df_orig[['OPEN_DT', 'TYPE', 'tract_and_block_group']]
   d = make_top_n_dict(df)
   d2 = make_top_n_dict_for_all_yrs(df)
   d3 = incorporate_totals_into_orig_dict(d, d2)
@@ -434,7 +435,7 @@ def transform_issues_by_year_per_1000(d, population_dict, tract_and_block_group)
     return new_d
 
 
-def add_geojson(top_dict, population_dict):
+def add_geojson(top_dict, population_dict, census_dict):
     """Returns dict, not JSON"""
     with open("static/boston_census_block_groups.geojson") as data_file:    
         geojson = json.load(data_file)    
@@ -444,7 +445,8 @@ def add_geojson(top_dict, population_dict):
     for feature in geojson['features']:
         id_ = feature['properties']['tract_and_block_group']
 
-        if id_ in top_dict['top_n_by_yr'] and id_ not in BLOCK_GROUP_BLACKLIST + OUTLIERS_LOW_POP + OUTLIERS_COMMERCIAL_INDUSTRIAL:
+        if id_ in top_dict['top_n_by_yr'] and id_ not in BLOCK_GROUP_BLACKLIST + OUTLIERS_LOW_POP + OUTLIERS_COMMERCIAL_INDUSTRIAL + OUTLIERS_POP_0:
+            # original stuff
             feature['properties']['issues_by_year'] = top_dict['top_n_by_yr'][id_]
             feature['properties'].update(make_total_issues_by_year(top_dict['top_n_by_yr_totals'][id_]))            
             feature['properties']['total_issues_all_years'] = top_dict['top_n_all_yrs_totals'][id_]
@@ -455,7 +457,7 @@ def add_geojson(top_dict, population_dict):
                 id_
             )
 
-            # import ipdb; ipdb.set_trace()
+            # per capita stuff and adding population
             feature['properties']['pop'] = population_dict[id_]
 
             for col in [col for col in feature['properties'] if 'total_issues_' in col]:
@@ -465,6 +467,12 @@ def add_geojson(top_dict, population_dict):
                 new_value = None              
               feature['properties'][col + '_per_1000'] = new_value
 
+            # adding census vars
+            for census_var in census_dict:
+              if id_ in census_dict[census_var]:
+                feature['properties'][census_var] = census_dict[census_var][id_]
+
+
             new_features.append(feature)
             
     geojson['features'] = new_features
@@ -472,10 +480,25 @@ def add_geojson(top_dict, population_dict):
     return geojson
 
 
+def make_census_vars_dict(df_orig, chosen_cols=['income']):
+  """
+  Returns (example):
+  {'bedroom': {'0511011': 2, '1004002': 3},
+   'income': {'0511011': 112500, '1004002': 112500}}  
+  """
+  df_transformed = transform_dataset(df_orig)
+  # chosen_cols = ['race_white', 'race_black', 'race_asian', 'race_hispanic', 'race_other', 'poverty_pop_below_poverty_level', 'earned_income_per_capita', 'poverty_pop_w_public_assistance', 'poverty_pop_w_food_stamps', 'poverty_pop_w_ssi', 'school', 'school_std_dev', 'housing', 'housing_std_dev', 'bedroom', 'bedroom_std_dev', 'value', 'value_std_dev', 'rent', 'rent_std_dev', 'income', 'income_std_dev', 'Source', 'Property_Type']
+  ans = df_transformed[chosen_cols + ['tract_and_block_group']].set_index('tract_and_block_group').to_dict()
+  return ans
+
+
 def make_q1_map_json():
-    d1 = make_q1_json()
+    # df_orig is slow bc d1 reads from a serialized json
+    df_orig = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')
+    d1 = make_q1_json(df_orig)
     population_dict = add_population(df=None, just_dict=True)
-    d2 = add_geojson(d1, population_dict)
+    census_dict = make_census_vars_dict(df_orig)
+    d2 = add_geojson(d1, population_dict, census_dict)
     return d2
 
 
