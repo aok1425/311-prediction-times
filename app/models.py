@@ -391,7 +391,8 @@ def incorporate_totals_into_orig_dict(d, d_totals_by_yr):
   return d
 
 
-def make_q1_json(df_orig):
+def make_q1_json():
+  df_orig = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')
   df = df_orig[['OPEN_DT', 'TYPE', 'tract_and_block_group']]
   d = make_top_n_dict(df)
   d2 = make_top_n_dict_for_all_yrs(df)
@@ -480,24 +481,35 @@ def add_geojson(top_dict, population_dict, census_dict):
     return geojson
 
 
-def make_census_vars_dict(df_orig, chosen_cols=['income']):
+def make_census_vars_dict(chosen_cols=['income']):
   """
   Returns (example):
   {'bedroom': {'0511011': 2, '1004002': 3},
    'income': {'0511011': 112500, '1004002': 112500}}  
   """
+  df_orig = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')  
   df_transformed = transform_dataset(df_orig)
   # chosen_cols = ['race_white', 'race_black', 'race_asian', 'race_hispanic', 'race_other', 'poverty_pop_below_poverty_level', 'earned_income_per_capita', 'poverty_pop_w_public_assistance', 'poverty_pop_w_food_stamps', 'poverty_pop_w_ssi', 'school', 'school_std_dev', 'housing', 'housing_std_dev', 'bedroom', 'bedroom_std_dev', 'value', 'value_std_dev', 'rent', 'rent_std_dev', 'income', 'income_std_dev', 'Source', 'Property_Type']
   ans = df_transformed[chosen_cols + ['tract_and_block_group']].set_index('tract_and_block_group').to_dict()
+
+  with open('static/census_data.json', 'w') as data_file:    
+    json.dump(ans, data_file, ensure_ascii=False) 
+
   return ans
 
 
+# TODO: make this feed directly into the one above
+def make_census_vars_dict(*args, **kwargs):
+  with open('static/census_data.json') as data_file:    
+    data = json.load(data_file)
+
+  return data
+
+
 def make_q1_map_json():
-    # df_orig is slow bc d1 reads from a serialized json
-    df_orig = pd.read_pickle('../data/data_from_remove_from_dataset.pkl')
-    d1 = make_q1_json(df_orig)
+    d1 = make_q1_json()
     population_dict = add_population(df=None, just_dict=True)
-    census_dict = make_census_vars_dict(df_orig)
+    census_dict = make_census_vars_dict()
     d2 = add_geojson(d1, population_dict, census_dict)
     return d2
 
