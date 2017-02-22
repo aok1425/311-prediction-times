@@ -1,0 +1,16 @@
+digraph Tree {
+node [shape=box] ;
+0 [label="race_hispanic <= 0.0512\nmse = 147147.8988\nsamples = 425\nvalue = 808.492"] ;
+1 [label="earned_income_per_capita <= 45776.0\nmse = 157775.7872\nsamples = 115\nvalue = 1062.367"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="mse = 88762.2716\nsamples = 50\nvalue = 858.9168"] ;
+1 -> 2 ;
+3 [label="mse = 154530.8205\nsamples = 65\nvalue = 1218.8672"] ;
+1 -> 3 ;
+4 [label="value_std_dev <= 1.9291\nmse = 110425.7187\nsamples = 310\nvalue = 714.3125"] ;
+0 -> 4 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+5 [label="mse = 48528.9297\nsamples = 35\nvalue = 309.8245"] ;
+4 -> 5 ;
+6 [label="mse = 94830.1039\nsamples = 275\nvalue = 765.7928"] ;
+4 -> 6 ;
+}

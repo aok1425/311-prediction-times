@@ -4,6 +4,8 @@ from sklearn.metrics import r2_score
 from IPython.display import Image
 from sklearn.tree import export_graphviz
 import subprocess
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+import statsmodels.api as sm
 
 
 def dummify_cols_and_baselines(df, cols):
@@ -98,3 +100,28 @@ def visualize_tree(tree, feature_names):
     subprocess.check_call(command)
         
     return Image('dt.png')
+
+
+def get_vif(exog, exog_label_or_idx):
+    """Now works w DataFrames, and adds the intercept column."""
+    assert type(exog) == pd.DataFrame
+    assert type(exog_label_or_idx) in (str, int)
+    
+    if type(exog_label_or_idx) == str:
+        exog_idx = list(exog.columns).index(exog_label_or_idx)
+    else:
+        exog_idx = exog_label_or_idx
+    
+    exog_w_intercept = sm.add_constant(exog.as_matrix(), prepend=False)
+    return variance_inflation_factor(exog_w_intercept, exog_idx)
+
+
+def get_vifs(df, response):
+    """Input the df and response column, and get the variance inflation factors for each of the predictors."""
+    answer = {}
+    cols = [i for i in df.columns if i != response]
+    
+    for col in cols:
+        answer[col] = get_vif(df.drop(response, axis=1), col)
+    
+    return pd.Series(answer).sort_values(ascending=False)    
