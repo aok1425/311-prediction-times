@@ -8,14 +8,14 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 import statsmodels.api as sm
 
 
-def dummify_cols_and_baselines(df, cols):
+def dummify_cols_and_baselines(df, cols, chosen_col_i=1):
     baseline_cols = []
     
     for i, column in enumerate(cols):
-        baseline = sorted(df[column].unique())[-1]
+        baseline = sorted(df[column].unique())[-chosen_col_i]
         print baseline, 'is baseline', i, len(cols)
         baseline_cols += [baseline]
-        dummy = pd.get_dummies(df[column]).rename(columns=lambda x: column+'_'+str(x)).iloc[:,0:len(df[column].unique())-1]
+        dummy = pd.get_dummies(df[column]).rename(columns=lambda x: column+'_'+str(x)).iloc[:,0:len(df[column].unique()) - chosen_col_i]
         df = df.drop(column, axis=1) #Why not inplace? because if we do inplace, it will affect the df directly
         df = pd.concat([df, dummy], axis=1)
         
