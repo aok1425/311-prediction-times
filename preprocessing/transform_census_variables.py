@@ -64,6 +64,7 @@ class CensusVariablesTransformer(object):
         category_cols = [col for col in df.columns if category + '_' == col[:len(category) + 1]]
         categ_df = df[category_cols]
         categ_df_wo_total = categ_df[[col for col in categ_df.columns if col != category_total_col]]
+        categ_df_wo_total_div_by_total = categ_df_wo_total.truediv(df[category_total_col], axis='rows')
         
         max_categ_df = categ_df_wo_total.idxmax(axis=1)
         new_df = df.drop(category_cols, axis=1)    
@@ -81,7 +82,7 @@ class CensusVariablesTransformer(object):
         elif category == 'housing':
             new_df[category] = max_categ_df.map(lambda txt: txt[8:])
 
-        new_df[category + '_std_dev'] = categ_df_wo_total.std(axis=1)
+        new_df[category + '_std_dev'] = categ_df_wo_total_div_by_total.std(axis=1)
             
         return new_df
 
