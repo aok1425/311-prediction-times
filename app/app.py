@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 # app.permanent_session_lifetime = 60 * 60 * 1.5 # seconds, so 1.5 hours
 # TODO: uncomment the below
-# model = get_model() # temporary
+model = get_model() # temporary
 q1_dict = make_q1_map_json()
 
 
