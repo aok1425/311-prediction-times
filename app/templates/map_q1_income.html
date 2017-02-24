@@ -1,7 +1,6 @@
+{% extends "layout.html" %}
 
-<!DOCTYPE html>
-<html>
-<head>
+{% block head %}
     <meta charset='utf-8' />
     <title>Income</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
@@ -13,7 +12,7 @@
     <script src="{{ url_for('static', filename='./js/jquery-3.1.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='./js/bootstrap.min.js') }}"></script>    
     <style>
-    .sidebar { width:300px; }
+    .sidebar { width:300px; top:50px;}
     .legend { background-color:#f1f1f0; }
     .lifted { box-shadow:0 1px 2px rgba(0,0,0,0.10); }
 
@@ -44,7 +43,10 @@
       margin: 5px 0;
     }    
     </style>
-</head>
+{% endblock %}
+
+{% block body %}
+
 <body>
 
 <div id='map' class='col12 pin-top pin-bottom'></div>
@@ -91,4 +93,6 @@
 <script src="{{ url_for('static', filename='./js/map_q1_income.js') }}"></script>
 
 </body>
+{% endblock %}
+
 </html>
