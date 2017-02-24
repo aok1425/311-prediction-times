@@ -38,6 +38,11 @@ def get_top_types():
     return jsonify(q1_dict) 
 
 
+@app.route('/map4')
+def map_q2_means():
+    return render_template('map_q2_means.html') 
+
+
 @app.route('/map3')
 def map_q1_income():
     return render_template('map_q1_income.html') 

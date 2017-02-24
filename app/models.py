@@ -4,6 +4,15 @@ import pandas as pd
 from collections import defaultdict
 import json
 from utilities import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP, OUTLIERS_POP_0, transform_dataset
+import math
+
+CATEGORY_GROUPS_IN_QUESTION = {
+  'Animal Control': ['Pick up Dead Animal', 'Animal Generic Request'],
+  'Abandoned Vehicles': ['Abandoned Vehicles', 'Abandoned Bicycle'],
+  'Rodent Removal': ['Rodent Activity', 'Bed Bugs', 'Mice Infestation - Residential'],
+  'Living Conditions': ['Unsatisfactory Living Conditions', 'Poor Conditions of Property', 'Unsanitary Conditions - Establishment', 'Illegal Occupancy', 'Heat - ,Excessive  Insufficient'],
+  'Graffiti Removal': ['Graffiti Removal']
+}
 
 
 sample_row = {'Source_Citizens Connect App': 1,
@@ -432,7 +441,7 @@ def transform_issues_by_year_per_1000(d, population_dict, tract_and_block_group)
     return new_d
 
 
-def add_geojson(top_dict, population_dict, census_dict):
+def add_geojson(top_dict, population_dict, census_dict, completion_time_means_dict, completion_time_stds_dict):
     """Returns dict, not JSON"""
     with open("static/boston_census_block_groups.geojson") as data_file:    
         geojson = json.load(data_file)    
@@ -469,6 +478,17 @@ def add_geojson(top_dict, population_dict, census_dict):
               if id_ in census_dict[census_var]:
                 feature['properties'][census_var] = census_dict[census_var][id_]
 
+            # adding q2 means and std devs
+            if id_ in completion_time_means_dict:
+              for k,v in completion_time_means_dict[id_].items():
+                feature['properties']['completion_time_mean_' + k] = v
+
+            if id_ in completion_time_stds_dict:
+              for k,v in completion_time_stds_dict[id_].items():
+                if math.isnan(v):
+                  v = 0
+                feature['properties']['completion_time_std_' + k] = v
+
 
             new_features.append(feature)
             
@@ -502,11 +522,27 @@ def make_census_vars_dict(*args, **kwargs):
   return data
 
 
+def make_dict1():
+  with open('static/q2_means.json') as data_file:    
+    data = json.load(data_file)
+
+  return data  
+
+
+def make_dict2():
+  with open('static/q2_std.json') as data_file:    
+    data = json.load(data_file)
+
+  return data  
+
+
 def make_q1_map_json():
     d1 = make_q1_json()
     population_dict = add_population(df=None, just_dict=True)
     census_dict = make_census_vars_dict()
-    d2 = add_geojson(d1, population_dict, census_dict)
+    completion_time_means_dict = make_dict1()
+    completion_time_stds_dict = make_dict2()
+    d2 = add_geojson(d1, population_dict, census_dict, completion_time_means_dict, completion_time_stds_dict)
     return d2
 
 
