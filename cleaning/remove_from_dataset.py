@@ -10,6 +10,7 @@ def clean_sources(df):
 
 
 def remove_null_ys(df):
+    """This too easily gets rid of the negative completion time values. If I had more time and wanted external validity, I should investigate these, since 100k of the 900k rows are negative."""
     return df.dropna(subset=['CLOSED_DT'])
 
 

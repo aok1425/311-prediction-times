@@ -1,3 +1,6 @@
+# done by me visually
+# bc I couldn't find source from Boston Redevelopment Authority
+
 zipcode_mapping = {2026: 'Dedham',
  2108: 'Beacon Hill',
  2109: 'Downtown / Financial District',
