@@ -10,6 +10,8 @@ case_enquiry_ids.csv
 data_*.csv
 feat*.csv
 *tableau*.csv
+dt.dot
+dt.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
