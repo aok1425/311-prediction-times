@@ -1,3 +1,5 @@
+# by num_issues_pred I mean Q1 civic participation
+
 # TODO: if I had more time, search Census for some measure of whether residnential or commerical
 # bc in fidi lotsa issues bc parking, non-residential stuff
 
