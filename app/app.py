@@ -1,7 +1,7 @@
 from __future__ import division
 from flask import Flask, session, redirect, url_for, escape, request, render_template, jsonify
 import random
-from models import get_model, make_pred, sample_row, make_q1_map_json
+from models.models import get_model, make_pred, make_q1_map_json
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -28,11 +28,6 @@ def predict_results():
     return str(pred)[:4]
 
 
-@app.route('/explore', methods=['GET', 'POST'])
-def explore():
-    return render_template('explore.html')
-
-
 @app.route('/get-q1-top-types')
 def get_top_types():
     return jsonify(q1_dict) 
@@ -53,7 +48,7 @@ def map():
     return render_template('map_q1.html')    
 
 
-@app.route('/map')
+@app.route('/map1')
 def map_per_1000():
     return render_template('map_q1_per_1000.html')   
 

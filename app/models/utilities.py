@@ -20,7 +20,7 @@ def transform_dataset():
 	raise Exception(crazy_text)
 
 # This some real hacky stuff here
-# supposed to be imported from ../preprocessing/transform_for_num_issues_pred.py
+# supposed to be imported from ../preprocessing/transform_for_q1_civic_participation.py
 def add_population(df, just_dict=False):
     # will use race_total as proxy for pop for Census block group
     # just_dict is for making the API endpoint

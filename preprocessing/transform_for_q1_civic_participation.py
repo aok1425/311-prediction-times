@@ -1,5 +1,3 @@
-# by num_issues_pred I mean Q1 civic participation
-
 # TODO: if I had more time, search Census for some measure of whether residnential or commerical
 # bc in fidi lotsa issues bc parking, non-residential stuff
 
@@ -10,11 +8,10 @@ from datetime import datetime
 import re
 from tqdm import tqdm
 
+import os, sys
+sys.path.append(os.path.join(os.path.dirname('.'), "../app/models"))
 
-BLOCK_GROUP_BLACKLIST = ["9807001", "9818001", "0303003", "0701018", "9811003"] # these are parks or South Station
-OUTLIERS_COMMERCIAL_INDUSTRIAL = ['0102034', '0107013', '0512001', '0612002', '0701012', '1101033', '9812021']
-OUTLIERS_LOW_POP = ['0005024', '0008032', '0103002', '0104051']
-OUTLIERS_POP_0 = [u'9811002', u'9815011', u'9810001', u'9811001', u'9816001', u'9817001', u'9812011', u'9815021']
+from outliers import outliers
 
 
 def dummify(df, column, keep_baseline=False):
@@ -125,7 +122,6 @@ def assert_no_duplicates(df, **kwargs):
 
 
 def drop_outliers(df, **kwargs):
-    outliers = OUTLIERS_LOW_POP + OUTLIERS_COMMERCIAL_INDUSTRIAL + BLOCK_GROUP_BLACKLIST + OUTLIERS_POP_0
     df1 = df[~df.tract_and_block_group.isin(outliers)]
     assert df.shape != df1.shape
     return df1
