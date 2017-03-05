@@ -23,12 +23,12 @@ from outliers import outliers
 
 
 def get_model():
-  return None
+  # return None
   file = 'static/q2_rf_model.pkl'
   if os.path.isfile(file):
     return joblib.load(file)
   else:
-    Popen(['wget', 'https://s3.amazonaws.com/aok1425/q2_rf_model.pkl', 'static/'])
+    Popen(['wget', 'https://s3.amazonaws.com/aok1425/q2_rf_model.pkl', '-P','static/'])
     return joblib.load(file)
  
 
