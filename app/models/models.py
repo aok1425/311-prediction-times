@@ -32,6 +32,21 @@ def get_model():
     return joblib.load(file)
  
 
+def get_preds_for_all_trees(model, X_test_row):
+    """So that I can get a quasi-prediction interval from them."""
+    # assert type(model) == GridSearchCV
+    assert X_test_row.shape[0] == 1
+    
+    trees = model.best_estimator_.steps[-1][-1].estimators_
+    preds = []
+    
+    for tree in trees:
+        pred = tree.predict(X_test_row)
+        preds.append(pred)
+        
+    return pd.np.array(preds)
+
+
 def make_pred(request_form_dict, model):
   row = sample_row.copy()
   d = dict(request_form_dict)
