@@ -24,6 +24,7 @@ def predict():
 
 @app.route('/predict-results', methods=['POST'])
 def predict_results():
+    # return str(request.form)
     pred = make_pred(request.form, model)
     return str(pred)[:4]
 

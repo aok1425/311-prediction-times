@@ -3,8 +3,15 @@ from sklearn.externals import joblib
 import pandas as pd
 from collections import defaultdict
 import json
-from utilities import add_population, BLOCK_GROUP_BLACKLIST, OUTLIERS_COMMERCIAL_INDUSTRIAL, OUTLIERS_LOW_POP, OUTLIERS_POP_0, transform_dataset
+from utilities import add_population, transform_dataset
 import math
+from sample_row import sample_row, col_order
+from subprocess import Popen
+
+import os, sys
+sys.path.append(os.path.join(os.path.dirname('.'), "../"))
+from outliers import outliers
+
 
 # CATEGORY_GROUPS_IN_QUESTION = {
 #   'Animal Control': ['Pick up Dead Animal'],
@@ -16,30 +23,37 @@ import math
 
 
 def get_model():
-  return joblib.load('model_completion_time.pkl') 
-
-
-def get_model():
-  return joblib.load('../data/model_completion_time.pkl')
+  return None
+  file = 'static/q2_rf_model.pkl'
+  if os.path.isfile(file):
+    return joblib.load(file)
+  else:
+    Popen(['wget', 'https://s3.amazonaws.com/aok1425/q2_rf_model.pkl', 'static/'])
+    return joblib.load(file)
  
 
 def make_pred(request_form_dict, model):
+  row = sample_row.copy()
   d = dict(request_form_dict)
 
   for k,v in d.items():
     v = v[0]
     if k == 'source':
-      v = 'Source_' + v
+      row['Source_' + v] = 1
     elif k == 'issue':
-      v = 'TYPE_' + v
+      row['TYPE_' + v] = 1
     elif k == 'neighborhood':
-      v = 'neighborhood_from_zip_' + v
+      row['neighborhood_from_zip_' + v] = 1
 
-    if v in row:
-      row[v] = 1
+  print [ij for ij in row.items() if ij[1] == 1]
+  aa = sum(row.values())
+  print aa
+
+  if aa == 0:
+    return 'sthwrong'
 
   # row = sample_row
-  pred = model.predict(pd.DataFrame([row]))[0]
+  pred = model.predict(pd.DataFrame([row])[col_order])[0]
   print pred
   return pred
 
@@ -218,7 +232,7 @@ def add_geojson(top_dict, population_dict, census_dict, completion_time_means_di
     for feature in geojson['features']:
         id_ = feature['properties']['tract_and_block_group']
 
-        if id_ in top_dict['top_n_by_yr'] and id_ not in BLOCK_GROUP_BLACKLIST + OUTLIERS_LOW_POP + OUTLIERS_COMMERCIAL_INDUSTRIAL + OUTLIERS_POP_0:
+        if id_ in top_dict['top_n_by_yr'] and id_ not in outliers:
             # original stuff
             feature['properties']['issues_by_year'] = top_dict['top_n_by_yr'][id_]
             feature['properties'].update(make_total_issues_by_year(top_dict['top_n_by_yr_totals'][id_]))            
