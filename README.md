@@ -1,8 +1,4 @@
-```reStructuredText
-tl;dr: I investigated fairness in city 311 services (e.g. fixing a pothole) in Boston, and found that an area with a higher proportion of Hispanics was associated with _slower_ completion time.
-```
-
-
+> tl;dr: I investigated fairness in city 311 services (e.g. fixing a pothole) in Boston, and found that an area with a higher proportion of Hispanics was associated with _slower_ completion time.
 
 # Investigating fairness in Boston 311 city services
 
