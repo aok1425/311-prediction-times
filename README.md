@@ -1,5 +1,17 @@
 > tl;dr: I investigated fairness in city 311 services (e.g. fixing a pothole) in Boston, and found that an area with a higher proportion of Hispanics was associated with _slower_ completion time.
 
+## Table of Contents
+
+1. [Introduction](#investigating-fairness-in-Boston-311-city-services)
+2. [Methods](#methods)
+3. [Results](#results)
+4. [Caveats](#caveats)
+5. [Conclusion](#conclusion) 
+6. [Appendix](#appendix)
+   * [6.1 Next steps](#next-steps)
+   * [6.2 Challenges](#challenges)
+   * [6.3 Model performance](#model-performance)
+
 # Investigating fairness in Boston 311 city services
 
 311 is the number you can call to have the city fix a pothole, remove grafitti, or [retrieve keys from a public trash container](https://www.bostonglobe.com/opinion/letters/2015/12/30/boston-service-really-works/9qzMXKQifIHK85cwUxgnxL/story.html). Since Boston launched its 311 service in [2015](https://www.bostonglobe.com/metro/2015/08/11/boston-launches-non-emergency-hotline/fKZXUvQ33PLFhyZ5nF5e7H/story.html) along with public performance data, it offers one of the most concrete ways to hold the city accountable to its citizens.
@@ -38,7 +50,7 @@ I considered the issues that were completed in more than 3 standard deviations a
 
 The second biggest caveat is my category groupings. I chose the categories that on paper look like they would be done by the same department, and involve similar processes (i.e. all categories involving snow plows means the plows would come from the same depots, so they would likely be associated with similar factors). Ideally, I would again chat with city staff to learn the processes for each of the categories, and group the categories accordingly.
 
-## Interpretation / Conclusion
+## Conclusion
 
 My most notable finding was that a higher proportion of Hispanics in an area is associated with slower 311 completion time, for the four category groups I looked at. One common follow-up question is: by how much? My model is "noisy" enough that I am not confident in the amount, but it is notable that the proportion of Hispanics is always statistically significantly associated with slower completion time, and never faster, than baseline.
 
