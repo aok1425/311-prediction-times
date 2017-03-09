@@ -1,8 +1,10 @@
+# Investigating fairness in Boston 311 city services
+
 > tl;dr: I investigated fairness in city 311 services (e.g. fixing a pothole) in Boston, and found that an area with a higher proportion of Hispanics was associated with _slower_ completion time.
 
 ## Table of Contents
 
-1. [Introduction](#investigating-fairness-in-Boston-311-city-services)
+1. [Introduction](#introduction)
 2. [Methods](#methods)
 3. [Results](#results)
 4. [Caveats](#caveats)
@@ -12,7 +14,7 @@
    * [6.2 Challenges](#challenges)
    * [6.3 Model performance](#model-performance)
 
-# Investigating fairness in Boston 311 city services
+## Introduction
 
 311 is the number you can call to have the city fix a pothole, remove grafitti, or [retrieve keys from a public trash container](https://www.bostonglobe.com/opinion/letters/2015/12/30/boston-service-really-works/9qzMXKQifIHK85cwUxgnxL/story.html). Since Boston launched its 311 service in [2015](https://www.bostonglobe.com/metro/2015/08/11/boston-launches-non-emergency-hotline/fKZXUvQ33PLFhyZ5nF5e7H/story.html) along with public performance data, it offers one of the most concrete ways to hold the city accountable to its citizens.
 
