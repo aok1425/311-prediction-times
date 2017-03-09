@@ -1,4 +1,4 @@
-# Investigating fairness in Boston 311 city services
+<img src="data/img/title.png" align="middle"/>
 
 > tl;dr: I investigated fairness in city 311 services (e.g. fixing a pothole) in Boston, and found that an area with a higher proportion of Hispanics was associated with _slower_ completion time.
 
@@ -20,8 +20,7 @@
 
 I investigate the factors associated with 311 completion time, mostly socioeconomic and demographic, but also factors related to city workload.
 
-![q2_map](http://i.imgur.com/YSucwbD.png)
-
+<img src="data/img/completion_time_map.png" align="middle"/>
 Figure 1. Number of hours to completion for Animal Control issues by Census block group.
 
 ## Methods
@@ -29,7 +28,7 @@ Figure 1. Number of hours to completion for Animal Control issues by Census bloc
 I retrieved 5+ years worth of 311 data from [Boston's data portal](https://data.cityofboston.gov/City-Services/311-Service-Requests/awu8-dc52), totaling 900,000+ rows. I retrieved socioeconomic data from the Census.
 
 These are 2 sample issues from my dataset, transposed:
-![q2_sample_rows](http://i.imgur.com/Hl40EL8.png)
+<img src="data/img/q2_sample_rows.png" align="middle"/>
 
 The most detailed level of Census data was by block group, about 6 Boston blocks roughly. Each socioeconomic indicator corresponds to the block group of the issue's location (Figure 1).
 
@@ -38,7 +37,7 @@ I grouped issues by categories (e.g. Request for Snow Plowing and Misc. Snow Com
 ## Results
 For the four category groups I looked at, I most notably found that a higher proportion of Hispanics was associated with worse performance:
 
-![q2_results](http://i.imgur.com/tiLVFJJ.png)
+<img src="data/img/q2_results.png" align="middle"/>
 
 Secondly, I found that neither average income nor average years of schooling were statistically significant features. I suspect that if I had taken the race features out, these may have been statistically significant.
 
