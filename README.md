@@ -81,3 +81,7 @@ The R2 scores for the test set for Living Conditions and Graffiti Removal were a
 When looking at the Root Mean Squared Error, a measure of how much our estimate differs from the result,  they are small, about equal to a standard deviation of `y_test`. This could mean that the variance in `y_test` is small, and/or that roughly on average, our estimate doesn't differ much from the result.
 
 Because I was overfitting, by a percentage point or so on R2, I am hesitant to put much confidence in the magnitude of the coefficients. That's why my finding was that in each of the models, one feature was repeatedly statistically significant, and in each case with the same sign. I figured that was the extent to which I could interpret the model results.
+
+### Related links
+
+- https://wamu.org/story/17/12/18/d-c-s-war-rats-goes-digital/
