@@ -13,6 +13,7 @@
    * [6.1 Next steps](#next-steps)
    * [6.2 Challenges](#challenges)
    * [6.3 Model performance](#model-performance)
+7. [Related links] (#related-links)
 
 ## Introduction
 
@@ -82,6 +83,6 @@ When looking at the Root Mean Squared Error, a measure of how much our estimate 
 
 Because I was overfitting, by a percentage point or so on R2, I am hesitant to put much confidence in the magnitude of the coefficients. That's why my finding was that in each of the models, one feature was repeatedly statistically significant, and in each case with the same sign. I figured that was the extent to which I could interpret the model results.
 
-### Related links
+## Related links
 
 - https://wamu.org/story/17/12/18/d-c-s-war-rats-goes-digital/
